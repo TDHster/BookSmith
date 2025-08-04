@@ -2,3 +2,4 @@ pydantic-settings
 pandas
 google-generativeai
 openpyxl
+python-docx
