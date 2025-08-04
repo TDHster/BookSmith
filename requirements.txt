@@ -1,0 +1,4 @@
+pydantic-settings
+pandas
+google-generativeai
+openpyxl
