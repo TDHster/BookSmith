@@ -1,5 +1,4 @@
 import pandas as pd
-from pathlib import Path
 from config.settings import settings
 
 class OutlineManager:
@@ -16,8 +15,8 @@ class OutlineManager:
                 "Chapter": ch["chapter"],
                 "Title": ch["title"],
                 "Generate": "✅",
-                "Summary": "",
-                "File": ""
+                "Summary": "",  # Инициализируем пустой строкой
+                "File": ""      # Инициализируем пустой строкой
             }
             for storyline in storylines:
                 row[storyline] = ch["events"].get(storyline, "")
@@ -28,14 +27,24 @@ class OutlineManager:
         return df
     
     def load_outline(self) -> pd.DataFrame:
-        return pd.read_excel(self.filename, engine='openpyxl')
+        # Явно указываем тип данных для колонок
+        dtype_spec = {
+            "Summary": str,
+            "File": str,
+            "Generate": str
+        }
+        return pd.read_excel(
+            self.filename, 
+            dtype=dtype_spec,
+            engine='openpyxl'
+        )
     
     def update_outline(self, chapter_num: int, summary: str, filename: str):
         df = self.load_outline()
         idx = df[df["Chapter"] == chapter_num].index[0]
         
         df.at[idx, "Generate"] = ""
-        df.at[idx, "Summary"] = summary
-        df.at[idx, "File"] = filename
+        df.at[idx, "Summary"] = str(summary)  # Явное преобразование в строку
+        df.at[idx, "File"] = str(filename)    # Явное преобразование в строку
         
         df.to_excel(self.filename, index=False)
