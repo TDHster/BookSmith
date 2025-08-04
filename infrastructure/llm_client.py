@@ -11,6 +11,10 @@ class GeminiClient:
         )
     
     def generate_text(self, prompt: str) -> str:
+        # Оцениваем длину промпта
+        token_count = len(prompt.split())  # Простая оценка
+        if token_count > 10000:  # Упрощенная проверка
+            logger.warning(f"Long prompt: {token_count} tokens")
         response = self.model.generate_content(
             prompt,
             generation_config=genai.GenerationConfig(temperature=0.7)

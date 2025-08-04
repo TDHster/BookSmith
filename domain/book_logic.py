@@ -1,9 +1,9 @@
 #domain/book_logic.py
 import json
 import re
-import logging
+from logger import logger 
 
-logger = logging.getLogger(__name__)
+MAX_RETRIES = 3
 
 
 class BookGenerator:
@@ -67,7 +67,6 @@ class BookGenerator:
         storylines: list,
         previous_summaries: list
     ) -> tuple:
-        # Убрали system_instruction из вызова
         prev_text = "\n".join(previous_summaries) if previous_summaries else "None"
         
         prompt = f"""
@@ -90,8 +89,14 @@ class BookGenerator:
         Return in JSON format:
         {{"text": "full chapter text", "summary": "3-sentence summary"}}
         """
-        
-        result = self.llm.generate_text(prompt)
+        for attempt in range(MAX_RETRIES):
+            try:
+                result = self.llm.generate_text(prompt)
+            except Exception as e:
+                logger.warning(f"Attempt {attempt+1} failed: {e}")
+                if attempt == MAX_RETRIES - 1:
+                    raise
+            
         try:
             # Используем улучшенный парсинг JSON
             data = self.extract_json(result)

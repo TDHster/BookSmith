@@ -6,7 +6,7 @@ class Settings(BaseSettings):
     MODEL_NAME: str = "gemini-1.5-pro-latest"
     OUTLINE_FILE: str = "book_outline.xlsx"
     CHAPTERS_DIR: str = "chapters"
-    LOG_LEVEL: str = "INFO"
+    LOG_LEVEL: str
     
     class Config:
         env_file = ".env"
