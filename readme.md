@@ -75,4 +75,4 @@ BookSmith/
 - Python 3.8+
 - Google Gemini API key
 - Dependencies listed in `requirements.txt`
-
+- a little command line expirience
