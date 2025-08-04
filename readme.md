@@ -53,8 +53,9 @@ python main.py generate_chapters
 
 ### Compile Book
 ```bash
-python main.py compile_book --title "My Generated Book"
+python main.py compile_book
 ```
+Save all chapters to .docx file with autogenerate name from chapters summary.
 
 ## Project Structure
 
