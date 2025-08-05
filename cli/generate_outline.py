@@ -2,16 +2,17 @@ import argparse
 from infrastructure.llm_client import GeminiClient
 from infrastructure.outline_manager import OutlineManager
 from domain.book_logic import BookGenerator
+from logger import logger
 
 def main(description: str):
     llm = GeminiClient()
     generator = BookGenerator(llm)
     manager = OutlineManager()
     
-    print("Generating plot...")
+    logger.info("Generating outline with description: {description}")
     storylines, chapters = generator.generate_plot(description)
     manager.save_outline(storylines, chapters)
-    print(f"Plot generated and saved to {manager.filename}")
+    logger.info(f"Outline generated and saved to {manager.filename}")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate book outline")

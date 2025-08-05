@@ -13,7 +13,7 @@ class Settings(BaseSettings):
     OUTLINE_FILE: str = "book_outline.xlsx"
     CHAPTERS_DIR: str = "chapters"
     DEFAULT_LANGUAGE: str
-    LOG_LEVEL: str
+    LOG_LEVEL: str = "INFO"
     BOOKS_DIR: str = "books"
 
 def get_settings():
