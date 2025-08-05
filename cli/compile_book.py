@@ -118,7 +118,7 @@ def compile_book(language: str, custom_title: str = None):
         
         # Разделяем текст на параграфы
         paragraphs = chapter_text.split("\n\n")
-        for para in paragraphs:
+        for para in paragraphs[1:]:
             if para.strip():  # Пропускаем пустые параграфы
                 doc.add_paragraph(para.strip(), style="Normal")
         
