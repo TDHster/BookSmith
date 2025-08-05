@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     )
     
     GEMINI_API_KEY: str
-    MODEL_NAME: str = "gemini-1.5-pro-latest"
+    MODEL_NAME: str = "gemini-2.0-flash"
     OUTLINE_FILE: str = "book_outline.xlsx"
     CHAPTERS_DIR: str = "chapters"
     DEFAULT_LANGUAGE: str
