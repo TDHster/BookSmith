@@ -1,6 +1,7 @@
 pydantic-settings
 pandas
 google-generativeai
+openai
 openpyxl
 python-docx
 pytest
