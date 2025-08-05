@@ -3,3 +3,5 @@ pandas
 google-generativeai
 openpyxl
 python-docx
+pytest
+pytest-mock
