@@ -27,6 +27,8 @@ class Settings(BaseSettings):
     DEFAULT_LANGUAGE: str
     LOG_LEVEL: str = "INFO"
     BOOKS_DIR: str = "books"
+    
+    CHAPTER_LENGHT: str = "800-1200 words" # for prompt
 
 def get_settings():
     return Settings()

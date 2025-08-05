@@ -20,13 +20,13 @@ def main(language):
     df = manager.load_outline()
     storylines = [col for col in df.columns if col not in ["Chapter", "Title", "Generate", "Summary", "File"]]
     
-    logger.debug("Generating chapters...")
+    logger.debug("Starting generating chapters...")
     
     # Сортируем главы по номеру
     df = df.sort_values(by="Chapter")
     
     for index, row in df.iterrows():
-        if row["Generate"] != "✅":
+        if row["Generate"] != "✅": # TODO fix to any not true value
             continue
         
         chapter_num = int(row["Chapter"])
@@ -54,7 +54,8 @@ def main(language):
             chapter_data,
             "Generated from outline",
             storylines,
-            previous_summaries
+            previous_summaries,
+            chapter_length=settings.CHAPTER_LENGHT
         )
         
         # 5. Сохраняем главу в файл
@@ -64,9 +65,9 @@ def main(language):
         
         # 6. Обновляем Excel (снимаем галочку и добавляем саммари)
         manager.update_outline(chapter_num, summary, filename)
-        print(f"Chapter {chapter_num} generated. Summary: {summary[:50]}...")
+        logger.debug(f"Chapter {chapter_num} generated. Summary: {summary[:50]}...")
     
-    print("All chapters generated!")
+    logger.info("All chapters generated!")
 
 if __name__ == "__main__":
     main()

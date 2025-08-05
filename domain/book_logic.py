@@ -5,7 +5,6 @@ from logger import logger
 
 MAX_RETRIES = 3
 
-
 class BookGenerator:
     def __init__(self, llm_client):
         self.llm = llm_client
@@ -65,7 +64,8 @@ class BookGenerator:
         chapter_data: dict, 
         book_description: str, 
         storylines: list,
-        previous_summaries: list
+        previous_summaries: list,
+        chapter_length: str = "800-1200 words"
     ) -> tuple:
         prev_text = "\n".join(previous_summaries) if previous_summaries else "None"
         
@@ -83,11 +83,11 @@ class BookGenerator:
         {json.dumps(chapter_data['events'], indent=2)}
         
         Write:
-        1. Full chapter text (800-1200 words)
+        1. Full chapter text ({chapter_length})
         2. 3-sentence summary of key events
         
         Return in JSON format:
-        {{"text": "full chapter text", "summary": "3-sentence summary"}}
+        {{"text": "full chapter text", "summary": "3-sentence summary, If you use proper names, be sure to include them in additional sentences with descriptions of what they are."}}
         """
         for attempt in range(MAX_RETRIES):
             try:
