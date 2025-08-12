@@ -9,6 +9,8 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8"
     )
+    DB_URL: str = "sqlite:///storywriter.db"
+
     LLM_PROVIDER: str = Field(default="gemini", env="LLM_PROVIDER")  # gemini, openai, etc.
 
     # GEMINI_API_KEY: str
