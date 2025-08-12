@@ -41,7 +41,7 @@ class GeminiClient(LLMClient):
         if token_count > 10000:
             logger.warning(f"Long Gemini prompt: {token_count} tokens")
         
-        logger.debug(f'{prompt=}')
+        # logger.debug(f'{prompt=}')
         response = self.model.generate_content(
             prompt,
             generation_config=self.genai.GenerationConfig(temperature=0.7)

@@ -6,6 +6,7 @@ from infrastructure.outline_manager import OutlineManager
 from domain.book_logic import BookGenerator
 from infrastructure.llm_client import LLMClientFactory
 from infrastructure.database.models import Book, Chapter, PlotLine, PlotEvent
+from cli.generate_chapters import main as generate_chapters_cli
 from sqlalchemy import delete
 import logging
 
@@ -83,6 +84,16 @@ def generate_outline():
     finally:
         session.close()
 
-
+@app.route("/generate-chapters", methods=["POST"])
+def generate_chapters():
+    try:
+        # Вызываем существующий CLI-код, но в вебе
+        generate_chapters_cli(language="Русский", book_id=1, user_id=USER_ID)
+        return "<div class='alert alert-success mt-3'>✅ Главы сгенерированы и сохранены в базу!</div>"
+    except Exception as e:
+        logger.error(f"Ошибка при генерации глав: {e}")
+        return f"<div class='alert alert-danger mt-3'>❌ Ошибка: {str(e)}</div>"
+    
+    
 if __name__ == "__main__":
     app.run(debug=True)
