@@ -11,7 +11,7 @@ def main(description: str, language: str):
     manager = OutlineManager()
     
     logger.info(f"Generating outline with description: {description}")
-    storylines, chapters = generator.generate_plot(description)
+    storylines, chapters = generator.generate_outline(description)
     manager.save_outline(storylines, chapters)
     logger.info(f"Outline generated and saved to {manager.filename}")
 

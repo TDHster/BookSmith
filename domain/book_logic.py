@@ -9,7 +9,7 @@ class BookGenerator:
     def __init__(self, llm_client):
         self.llm = llm_client
     
-    def generate_plot(self, book_description: str) -> tuple:
+    def generate_outline(self, book_description: str) -> tuple:
         # Убрали system_instruction из вызова
         prompt = f"""
         Create a detailed book plot based on this description: 
