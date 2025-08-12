@@ -10,7 +10,6 @@ class BookGenerator:
         self.llm = llm_client
     
     def generate_outline(self, book_description: str) -> tuple:
-        # Убрали system_instruction из вызова
         prompt = f"""
         Create a detailed book plot based on this description: 
         {book_description}
@@ -26,6 +25,9 @@ class BookGenerator:
         """
         
         result = self.llm.generate_text(prompt)
+        # 🔽 Защита: убедимся, что result — строка и не None
+        if not result or not isinstance(result, str):
+            result = "{}"
         try:
             data = json.loads(result.strip("```json\n").strip("\n```"))
             return data["storylines"], data["chapters"]

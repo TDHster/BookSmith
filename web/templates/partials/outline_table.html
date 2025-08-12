@@ -1,0 +1,35 @@
+<!-- web/templates/partials/outline_table.html -->
+<table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Глава</th>
+        <th>Название</th>
+        <th>Генерировать</th>
+        {% for sl in storylines %}
+        <th>{{ sl }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for ch in chapters %}
+      <tr>
+        <td>{{ ch.Chapter }}</td>
+        <td>{{ ch.Title }}</td>
+        <td>
+          {% if ch.Generate == "✅" %}
+            <input type="checkbox" checked disabled>
+          {% else %}
+            <input type="checkbox" disabled>
+          {% endif %}
+        </td>
+        {% for sl in storylines %}
+        <td>{{ ch[sl] }}</td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  
+  <div class="mt-3">
+    <button class="btn btn-success">Сгенерировать главы</button>
+  </div>

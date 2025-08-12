@@ -15,7 +15,7 @@ def main(description: str, language: str, title: str = "Новая книга"):
     # Генерируем сюжет
     llm = LLMClientFactory.create_client(language)
     generator = BookGenerator(llm)
-    logger.info(f"Генерация сюжета: {description}")
+    logger.info(f"Generating book outline: {description}")
 
     storylines, chapters = generator.generate_outline(description)
 
