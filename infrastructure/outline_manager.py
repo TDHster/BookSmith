@@ -2,6 +2,7 @@
 from sqlalchemy.orm import Session as DBSession
 from infrastructure.database.models import Book, Chapter, PlotLine, PlotEvent
 from typing import List, Dict
+from logger import logger
 
 class OutlineManager:
     def __init__(self, db_session: DBSession):
@@ -51,16 +52,21 @@ class OutlineManager:
 
             # События по линиям
             for storyline_name, event_desc in ch["events"].items():
-                if storyline_name in line_map and event_desc.strip():
+                if storyline_name in line_map:
+                    if not event_desc or not str(event_desc).strip():
+                        continue  # пропускаем пустые
+                    event_desc_str = str(event_desc).strip()
+                    if not event_desc_str:
+                        continue
                     event = PlotEvent(
                         chapter_id=chapter.id,
                         plot_line_id=line_map[storyline_name].id,
-                        description=str(event_desc)
+                        description=event_desc_str
                     )
                     self.session.add(event)
 
         self.session.commit()
-        print(f"✅ Книга '{book.title}' и сюжет сохранены в БД")
+        logger.info(f"✅ Книга '{book.title}' и сюжет сохранены в БД")
 
     def load_outline(self, book_id: int):
         """

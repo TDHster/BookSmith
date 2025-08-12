@@ -11,18 +11,18 @@ class BookGenerator:
     
     def generate_outline(self, book_description: str) -> tuple:
         prompt = f"""
-        Create a detailed book plot based on this description: 
-        {book_description}
-        
-        Return JSON format ONLY with these keys:
-        - "storylines": list of storyline names (5-7 items)
-        - "chapters": list of chapter details with:
-            "chapter": chapter number (start from 1),
-            "title": chapter title,
-            "events": dict where keys are storyline names and values are 1-sentence developments
-        
-        Include 8-12 chapters. Ensure logical progression across storylines.
-        """
+            Создай подробную структуру книги на основе этого описания:
+            {book_description}
+
+            Верни ТОЛЬКО JSON с такими ключами:
+            - "storylines": список названий сюжетных линий (5–7 штук)
+            - "chapters": список глав с полями:
+                "chapter": номер главы (начиная с 1),
+                "title": название главы,
+                "events": словарь, где ключи — названия линий, а значения — краткое развитие (по одному предложению)
+
+            Включи от 8 до 12 глав. Обеспечь логичное развитие сюжета по всем линиям.
+            """
         
         result = self.llm.generate_text(prompt)
         # 🔽 Защита: убедимся, что result — строка и не None
@@ -67,30 +67,34 @@ class BookGenerator:
         book_description: str, 
         storylines: list,
         previous_summaries: list,
-        chapter_length: str = "800-1200 words"
+        chapter_length: str = "800-1200 слов"
     ) -> tuple:
         prev_text = "\n".join(previous_summaries) if previous_summaries else "None"
         
         prompt = f"""
-        BOOK DESCRIPTION: {book_description}
+            ОПИСАНИЕ КНИГИ: {book_description}
+
+            СЮЖЕТНЫЕ ЛИНИИ: {", ".join(storylines)}
+
+            РЕЗЮМЕ ПРЕДЫДУЩИХ ГЛАВ:
+            {prev_text}
+
+            ТРЕБОВАНИЯ К ТЕКУЩЕЙ ГЛАВЕ:
+            Глава {chapter_data['chapter']}: {chapter_data['title']}
+            Развитие сюжета:
+            {json.dumps(chapter_data['events'], indent=2, ensure_ascii=False)}
+
+            Напиши:
+            1. Полный текст главы ({chapter_length})
+            2. Краткое резюме из трёх предложений — только ключевые события
+
+            ВАЖНО: ВСЁ — НА РУССКОМ ЯЗЫКЕ. НИКАКОГО АНГЛИЙСКОГО.
+
+            Верни ответ в формате JSON:
+            {{"text": "полный текст главы", "summary": "резюме из трёх предложений. Если упоминаешь имена, добавь описания, кто это и что представляет."}}
+            """
         
-        STORYLINES: {", ".join(storylines)}
         
-        PREVIOUS CHAPTER SUMMARIES:
-        {prev_text}
-        
-        CURRENT CHAPTER REQUIREMENTS:
-        Chapter {chapter_data['chapter']}: {chapter_data['title']}
-        Events:
-        {json.dumps(chapter_data['events'], indent=2)}
-        
-        Write:
-        1. Full chapter text ({chapter_length})
-        2. 3-sentence summary of key events
-        
-        Return in JSON format:
-        {{"text": "full chapter text", "summary": "3-sentence summary, If you use proper names, be sure to include them in additional sentences with descriptions of what they are."}}
-        """
         for attempt in range(MAX_RETRIES):
             try:
                 result = self.llm.generate_text(prompt)
@@ -114,10 +118,10 @@ class BookGenerator:
         
         except (ValueError, KeyError, json.JSONDecodeError) as e:
             # Сохраняем проблемный ответ для отладки
-            error_filename = f"error_chapter_{chapter_data['chapter']}.txt"
-            with open(error_filename, "w", encoding="utf-8") as f:
-                f.write(f"Prompt:\n{prompt}\n\nResponse:\n{result}")
+            # error_filename = f"error_chapter_{chapter_data['chapter']}.txt"
+            # with open(error_filename, "w", encoding="utf-8") as f:
+                # f.write(f"Prompt:\n{prompt}\n\nResponse:\n{result}")
             
             logger.error(f"Error processing chapter {chapter_data['chapter']}: {e}")
-            logger.error(f"Full error response saved to {error_filename}")
+            # logger.error(f"Full error response saved to {error_filename}")
             raise ValueError(f"Failed to process chapter response: {e}") from e
