@@ -176,6 +176,30 @@ def view_book(book_id):
     finally:
         session.close()
 
+@app.route("/delete-book", methods=["POST"])
+def delete_book():
+    try:
+        user_id = get_current_user_id()
+        book_id = int(request.form["book_id"])
+
+        session = Session()
+        try:
+            manager = OutlineManager(session)
+            manager.delete_book(book_id, user_id)
+            # Перенаправляем на список книг
+            return """
+            <script>
+                alert('Книга удалена');
+                window.location.href = '/books';
+            </script>
+            """
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.error(f"Ошибка при удалении книги: {e}")
+        return f"<div class='alert alert-danger'>Ошибка: {str(e)}</div>", 500
+
 @app.route("/chapter/<int:book_id>/<int:chapter_num>")
 def view_chapter(book_id, chapter_num):
     user_id = get_current_user_id()

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session as DBSession
 from infrastructure.database.models import Book, Chapter, PlotLine, PlotEvent
 from typing import List, Dict
 from logger import logger
+from sqlalchemy import delete
 
 class OutlineManager:
     def __init__(self, db_session: DBSession):
@@ -200,4 +201,19 @@ class OutlineManager:
             )
             self.session.add(event)
 
+        self.session.commit()
+    
+    def delete_book(self, book_id: int, user_id: int):
+        """
+        Полностью удаляет книгу и всё, что с ней связано
+        """
+        book = self.session.query(Book).filter(Book.id == book_id, Book.user_id == user_id).first()
+        if not book:
+            raise ValueError("Книга не найдена или доступ запрещён")
+
+        # Удаляем всё, что связано с книгой
+        self.session.execute(delete(PlotEvent).where(PlotEvent.chapter.has(book_id=book_id)))
+        self.session.execute(delete(PlotLine).where(PlotLine.book_id == book_id))
+        self.session.execute(delete(Chapter).where(Chapter.book_id == book_id))
+        self.session.execute(delete(Book).where(Book.id == book_id))
         self.session.commit()
