@@ -71,6 +71,7 @@ class OutlineManager:
     def load_outline(self, book_id: int):
         """
         Загружает книгу и сюжет в формате, похожем на Excel.
+        Возвращает структуру с Content для отображения кнопки "Читать".
         """
         book = self.session.query(Book).filter(Book.id == book_id).first()
         if not book:
@@ -111,9 +112,10 @@ class OutlineManager:
                 "Chapter": ch.number,
                 "Title": ch.title,
                 "Generate": "✅" if ch.generate_flag else "",
-                "Summary": ch.content or "",
-                "File": ch.context_summary or ""
+                "Summary": ch.context_summary or "",  # краткое резюме для LLM
+                "Content": ch.content or ""          # полный текст — для кнопки "Читать"
             }
+            # Добавляем сюжетные линии
             for line_name in line_names:
                 row[line_name] = event_map.get(ch.id, {}).get(line_name, "")
             data.append(row)
@@ -123,7 +125,7 @@ class OutlineManager:
             "storylines": line_names,
             "chapters": data
         }
-        
+
     def update_chapter_summary(self, book_id: int, chapter_number: int, summary: str, content: str = None):
         """
         Обновляет главу: снимает флаг generate, добавляет summary и (опционально) текст.

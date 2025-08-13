@@ -1,0 +1,22 @@
+<!-- web/templates/books.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Ваши книги</h1>
+
+<a href="/new-book" class="btn btn-primary mb-3">+ Новая книга</a>
+
+{% if books %}
+<ul class="list-group">
+  {% for book in books %}
+  <li class="list-group-item">
+    <a href="/book/{{ book.id }}">{{ book.title }}</a>
+    <span class="text-muted">— {{ book.premise[:50] }}...</span>
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>У вас пока нет книг. Создайте первую!</p>
+{% endif %}
+
+{% endblock %}
