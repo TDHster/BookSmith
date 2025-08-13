@@ -87,13 +87,34 @@ def generate_outline():
 @app.route("/generate-chapters", methods=["POST"])
 def generate_chapters():
     try:
-        # Вызываем существующий CLI-код, но в вебе
-        generate_chapters_cli(language="Русский", book_id=1, user_id=USER_ID)
-        return "<div class='alert alert-success mt-3'>✅ Главы сгенерированы и сохранены в базу!</div>"
+        user_id = get_current_user_id()
+        book_id = 1  # временно
+        generate_chapters_cli(language="Русский", book_id=book_id, user_id=user_id)
+
+        session = Session()
+        try:
+            # Загружаем книгу и сюжет
+            book = session.query(Book).filter(Book.id == book_id, Book.user_id == user_id).first()
+            if not book:
+                return "<div class='alert alert-danger'>Книга не найдена</div>", 404
+
+            manager = OutlineManager(session)
+            data = manager.load_outline(book_id)
+            if not data:
+                return "<div class='alert alert-warning'>Сюжет не сгенерирован</div>"
+
+            # Передаём book и chapters
+            return render_template("book_outline_table.html",
+                                 book=book,  # 🔥 Добавь это!
+                                 storylines=data["storylines"],
+                                 chapters=data["chapters"])
+        finally:
+            session.close()
+
     except Exception as e:
         logger.error(f"Ошибка при генерации глав: {e}")
         return f"<div class='alert alert-danger mt-3'>❌ Ошибка: {str(e)}</div>"
-
+    
 
 @app.route("/toggle-chapter", methods=["POST"])
 def toggle_chapter():
