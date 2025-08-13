@@ -202,5 +202,48 @@ def view_chapter(book_id, chapter_num):
     finally:
         session.close()
     
+@app.route("/update-event", methods=["POST"])
+def update_event():
+    try:
+        print("Form ", request.form)  # для отладки
+        user_id = get_current_user_id()
+        book_id = int(request.form["book_id"])
+        chapter_num = int(request.form["chapter_num"])
+        storyline_name = request.form["storyline"]
+        new_text = request.form["text"]
+
+        # Проверяем доступ
+        session = Session()
+        try:
+            book = session.query(Book).filter(Book.id == book_id, Book.user_id == user_id).first()
+            if not book:
+                return "Access denied", 403
+
+            manager = OutlineManager(session)
+            manager.update_plot_event(book_id, chapter_num, storyline_name, new_text)
+
+            # 🔥 Возвращаем ОБНОВЛЁННЫЙ textarea
+            return f'''
+            <textarea 
+              name="text"  
+              class="form-control form-control-sm"
+              hx-post="/update-event"
+              hx-include="[name=book_id]"
+              hx-vals='{{"chapter_num": {chapter_num}, "storyline": "{storyline_name}"}}'
+              hx-trigger="blur"
+              hx-target="this"
+              hx-swap="outerHTML"
+              style="min-height: 60px; font-size: 0.9rem; padding: 4px;"
+            >{new_text}</textarea>
+            '''
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.error(f"Ошибка при обновлении события: {e}")
+        return f"<div class='text-danger'>Ошибка: {str(e)}</div>", 500
+
+    
 if __name__ == "__main__":
     app.run(debug=True)

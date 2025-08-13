@@ -44,8 +44,20 @@
           {% endif %}
         </td>
         {% for sl in storylines %}
-        <td>{{ ch[sl] }}</td>
-        {% endfor %}
+        <td>
+            <textarea 
+              name="text"  
+              class="form-control form-control-sm"
+              hx-post="/update-event"
+              hx-include="[name=book_id]"
+              hx-vals='{"chapter_num": {{ ch.Chapter }}, "storyline": "{{ sl }}"}'
+              hx-trigger="blur"
+              hx-target="this"
+              hx-swap="outerHTML"
+              style="min-height: 60px; font-size: 0.9rem; padding: 4px;"
+            >{{ ch[sl] }}</textarea>
+          </td>     
+          {% endfor %}
       </tr>
       {% endfor %}
     </tbody>

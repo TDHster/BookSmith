@@ -158,3 +158,46 @@ class OutlineManager:
         if chapter:
             chapter.generate_flag = enabled
             self.session.commit()
+            
+    def update_plot_event(self, book_id: int, chapter_number: int, storyline_name: str, new_description: str):
+        """
+        Обновляет описание события по книге, главе и названию линии
+        """
+        # Находим главу
+        chapter = (
+            self.session.query(Chapter)
+            .join(Book)
+            .filter(Book.id == book_id, Chapter.number == chapter_number)
+            .first()
+        )
+        if not chapter:
+            raise ValueError(f"Глава {chapter_number} в книге {book_id} не найдена")
+
+        # Находим сюжетную линию
+        plot_line = (
+            self.session.query(PlotLine)
+            .filter(PlotLine.book_id == book_id, PlotLine.name == storyline_name)
+            .first()
+        )
+        if not plot_line:
+            raise ValueError(f"Сюжетная линия '{storyline_name}' не найдена")
+
+        # Находим событие
+        event = (
+            self.session.query(PlotEvent)
+            .filter(PlotEvent.chapter_id == chapter.id, PlotEvent.plot_line_id == plot_line.id)
+            .first()
+        )
+
+        if event:
+            event.description = new_description
+        else:
+            # Если события не было — создаём
+            event = PlotEvent(
+                chapter_id=chapter.id,
+                plot_line_id=plot_line.id,
+                description=new_description
+            )
+            self.session.add(event)
+
+        self.session.commit()
