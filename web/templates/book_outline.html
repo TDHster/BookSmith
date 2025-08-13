@@ -3,21 +3,37 @@
 
 {% block content %}
 <input type="hidden" name="book_id" value="{{ book.id }}">
-<h2>{{ book.title }}</h2>
-<p>{{ book.premise }}</p>
 
-<!-- 🔴 Кнопка удаления -->
-<div class="mt-4">
-  <button 
-    hx-post="/delete-book" 
-    hx-confirm="Вы уверены? Это удалит всю книгу и все главы безвозвратно." 
-    class="btn btn-danger btn-sm"
-    name="book_id"
-    value="{{ book.id }}"
-  >
-    🗑 Удалить книгу
-  </button>
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/books">Мои книги</a></li>
+    <li class="breadcrumb-item active" aria-current="page">{{ book.title }}</li>
+  </ol>
+</nav>
+
+
+<!-- Заголовок и кнопки на одной строке -->
+<div class="d-flex justify-content-between align-items-start mb-3">
+  <div>
+    <h2 class="mb-1">{{ book.title }}</h2>
+  </div>
+
+  <div class="d-flex gap-2">
+    <!-- Кнопка "Удалить книгу" -->
+    <button 
+      hx-post="/delete-book" 
+      hx-confirm="Удалить книгу безвозвратно?" 
+      class="btn btn-danger btn-sm"
+      name="book_id"
+      value="{{ book.id }}"
+    >
+      🗑 Удалить
+    </button>
+  </div>
 </div>
+
+
+<p>{{ book.premise }}</p>
 
 <div class="mt-3"></div>
   <button 
