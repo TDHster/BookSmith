@@ -4,7 +4,7 @@
 {% block content %}
 <h1>Создать новую книгу</h1>
 
-<form hx-post="/create-book" hx-target="#result" hx-indicator="#spinner">
+<form hx-post="/create-book" hx-indicator="#spinner">
   <div class="mb-3">
     <label class="form-label">Название книги</label>
     <input type="text" name="title" class="form-control" value="Новая книга" required>
@@ -16,8 +16,4 @@
   <button type="submit" class="btn btn-primary">Сгенерировать сюжет</button>
   <div class="htmx-indicator" id="spinner">⏳ Идёт генерация...</div>
 </form>
-
-<div id="result" class="mt-4">
-  <!-- Сюда подгрузится таблица -->
-</div>
 {% endblock %}

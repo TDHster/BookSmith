@@ -38,19 +38,11 @@ def create_book():
     description = request.form["description"]
     title = request.form.get("title", "Новая книга")
     user_id = get_current_user_id()
-    book_id = 1  # временно, пока не будет выбора
 
     logger.info(f"[WEB] Создание новой книги: {title}")
     session = Session()
 
     try:
-        # Удаляем старую книгу (если есть)
-        session.execute(delete(PlotEvent).where(PlotEvent.chapter.has(book_id=book_id)))
-        session.execute(delete(PlotLine).where(PlotLine.book_id == book_id))
-        session.execute(delete(Chapter).where(Chapter.book_id == book_id))
-        session.execute(delete(Book).where(Book.id == book_id))
-        session.commit()
-
         # Инициализируем компоненты
         llm = LLMClientFactory.create_client(language='gemini')
         generator = BookGenerator(llm)
@@ -59,7 +51,7 @@ def create_book():
         # Генерируем сюжет
         storylines, chapters = generator.generate_outline(description)
 
-        # Сохраняем как новую книгу с id=1
+        # Сохраняем как НОВУЮ книгу
         manager.save_outline(
             book_title=title,
             premise=description,
@@ -68,15 +60,13 @@ def create_book():
             user_id=user_id
         )
 
-        # Загружаем и возвращаем таблицу
-        data = manager.load_outline(book_id)
-        if not data:
-            return "<div class='alert alert-danger'>Не удалось загрузить сюжет</div>", 500
+        # Находим ID новой книги
+        book = session.query(Book).filter(Book.user_id == user_id).order_by(Book.id.desc()).first()
 
-        return render_template("book_outline_table.html",
-                             book=data["book"],
-                             storylines=data["storylines"],
-                             chapters=data["chapters"])
+        # 🔥 Возвращаем HX-Redirect на страницу редактирования
+        response = app.response_class()
+        response.headers["HX-Redirect"] = f"/book/{book.id}"
+        return response
 
     except Exception as e:
         logger.error(f"Ошибка при создании книги: {e}")
