@@ -1,5 +1,5 @@
 # web/app.py
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, redirect
 from config.settings import settings
 from infrastructure.database import init_db, Session
 from infrastructure.outline_manager import OutlineManager
@@ -26,8 +26,60 @@ BOOK_ID = 1  # 🔥 Работаем ТОЛЬКО с первой книгой
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    # return render_template("index.html")
+    return redirect("/books")
 
+@app.route("/new-book")
+def new_book_form():
+    return render_template("new_book.html")
+
+@app.route("/create-book", methods=["POST"])
+def create_book():
+    description = request.form["description"]
+    title = request.form.get("title", "Новая книга")
+    user_id = get_current_user_id()
+
+    logger.info(f"[WEB] Создание новой книги: {title}")
+    session = Session()
+
+    try:
+        # Инициализируем компоненты
+        llm = LLMClientFactory.create_client(language='gemini')
+        generator = BookGenerator(llm)
+        manager = OutlineManager(session)
+
+        # Генерируем сюжет
+        storylines, chapters = generator.generate_outline(description)
+
+        # Сохраняем как НОВУЮ книгу (без удаления старых!)
+        manager.save_outline(
+            book_title=title,
+            premise=description,
+            storylines=storylines,
+            chapters=chapters,
+            user_id=user_id
+        )
+
+        # Находим ID новой книги
+        book = session.query(Book).filter(Book.user_id == user_id).order_by(Book.id.desc()).first()
+
+        # Загружаем сюжет
+        data = manager.load_outline(book.id)
+        storylines = data["storylines"]
+        chapters = data["chapters"]
+
+        # Возвращаем таблицу
+        return render_template("book_outline_table.html",
+                             book=book,
+                             storylines=storylines,
+                             chapters=chapters)
+
+    except Exception as e:
+        logger.error(f"Ошибка при создании книги: {e}")
+        session.rollback()
+        return f"<div class='alert alert-danger'>Ошибка: {str(e)}</div>", 500
+    finally:
+        session.close()
 
 @app.route("/generate-outline", methods=["POST"])
 def generate_outline():
@@ -39,7 +91,7 @@ def generate_outline():
 
     try:
         # Инициализируем компоненты
-        llm = LLMClientFactory.create_client(language='gemini')  # Убедись, что gemini поддерживает русский
+        llm = LLMClientFactory.create_client(language='Русский')  # Убедись, что gemini поддерживает русский
         generator = BookGenerator(llm)
         manager = OutlineManager(session)
 

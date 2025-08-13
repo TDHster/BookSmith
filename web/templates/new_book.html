@@ -1,0 +1,23 @@
+<!-- web/templates/new_book.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Создать новую книгу</h1>
+
+<form hx-post="/create-book" hx-target="#result" hx-indicator="#spinner">
+  <div class="mb-3">
+    <label class="form-label">Название книги</label>
+    <input type="text" name="title" class="form-control" value="Новая книга" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Описание сюжета</label>
+    <textarea name="description" class="form-control" rows="3" placeholder="Например: Герой отправляется в путь, чтобы спасти мир" required></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Сгенерировать сюжет</button>
+  <div class="htmx-indicator" id="spinner">⏳ Идёт генерация...</div>
+</form>
+
+<div id="result" class="mt-4">
+  <!-- Сюда подгрузится таблица -->
+</div>
+{% endblock %}
