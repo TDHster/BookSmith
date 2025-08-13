@@ -2,7 +2,18 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1>Создать новую книгу</h1>
+
+<!-- Хлебные крошки -->
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/books">Мои книги</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Новая книга</li>
+  </ol>
+</nav>
+
+<!-- Заголовок и форма -->
+<h2>Создать новую книгу</h2>
+<p class="text-muted">Введите название и описание сюжета — система сгенерирует структуру книги.</p>
 
 <form hx-post="/create-book" hx-indicator="#spinner">
   <div class="mb-3">
@@ -16,4 +27,5 @@
   <button type="submit" class="btn btn-primary">Сгенерировать сюжет</button>
   <div class="htmx-indicator" id="spinner">⏳ Идёт генерация...</div>
 </form>
+
 {% endblock %}
