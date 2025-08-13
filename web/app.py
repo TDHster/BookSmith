@@ -316,4 +316,5 @@ def update_event():
 
     
 if __name__ == "__main__":
-    app.run(debug=True)
+    # app.run(debug=True)    
+    app.run(debug=True, port=8000)  # или 8000, 8081, 8888 и т.д.
