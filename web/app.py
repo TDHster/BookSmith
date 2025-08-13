@@ -93,7 +93,29 @@ def generate_chapters():
     except Exception as e:
         logger.error(f"Ошибка при генерации глав: {e}")
         return f"<div class='alert alert-danger mt-3'>❌ Ошибка: {str(e)}</div>"
-    
+
+
+@app.route("/toggle-chapter", methods=["POST"])
+def toggle_chapter():
+    try:
+        book_id = int(request.form["book_id"])
+        chapter_num = int(request.form["chapter_num"])
+        enabled = request.form.get("enabled") == "true"
+
+        session = Session()
+        manager = OutlineManager(session)
+
+        try:
+            manager.toggle_chapter_generate(book_id, chapter_num, enabled)
+            # Вернём обновлённый чекбокс
+            checked_attr = "checked" if enabled else ""
+            return f'<input type="checkbox" hx-post="/toggle-chapter" hx-include="[name=book_id]" hx-vals=\'{{"chapter_num":{chapter_num}, "enabled":{str(not enabled).lower()}}}\' hx-swap="outerHTML" {checked_attr}>'
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.error(f"Ошибка при переключении главы: {e}")
+        return "❌", 500
     
 if __name__ == "__main__":
     app.run(debug=True)

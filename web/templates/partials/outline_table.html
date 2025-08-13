@@ -1,4 +1,5 @@
 <!-- web/templates/partials/outline_table.html -->
+<input type="hidden" name="book_id" value="1">
 <table class="table table-bordered">
     <thead class="table-light">
       <tr>
@@ -17,9 +18,22 @@
         <td>{{ ch.Title }}</td>
         <td>
           {% if ch.Generate == "✅" %}
-            <input type="checkbox" checked disabled>
+            <input 
+              type="checkbox" 
+              hx-post="/toggle-chapter" 
+              hx-include="[name=book_id]" 
+              hx-vals='{"chapter_num": {{ ch.Chapter }}, "enabled": false}' 
+              hx-swap="outerHTML" 
+              checked
+            >
           {% else %}
-            <input type="checkbox" disabled>
+            <input 
+              type="checkbox" 
+              hx-post="/toggle-chapter" 
+              hx-include="[name=book_id]" 
+              hx-vals='{"chapter_num": {{ ch.Chapter }}, "enabled": true}' 
+              hx-swap="outerHTML"
+            >
           {% endif %}
         </td>
         {% for sl in storylines %}

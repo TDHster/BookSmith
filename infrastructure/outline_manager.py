@@ -142,4 +142,17 @@ class OutlineManager:
         if content:
             chapter.content = content
         self.session.commit()
-            
+
+    def toggle_chapter_generate(self, book_id: int, chapter_number: int, enabled: bool):
+        """
+        Включает/выключает флаг generate_flag для главы
+        """
+        chapter = (
+            self.session.query(Chapter)
+            .join(Book)
+            .filter(Book.id == book_id, Chapter.number == chapter_number)
+            .first()
+        )
+        if chapter:
+            chapter.generate_flag = enabled
+            self.session.commit()
