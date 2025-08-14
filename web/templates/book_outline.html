@@ -4,50 +4,45 @@
 {% block content %}
 <input type="hidden" name="book_id" value="{{ book.id }}">
 
-<!-- Хлебные крошки -->
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/books">Мои книги</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{ book.title }}</a></li>
-  </ol>
-</nav>
+<!-- Хлебные крошки и кнопка "Удалить" в одной строке -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="/books">Мои книги</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ book.title }}</li>
+    </ol>
+  </nav>
 
-<!-- Заголовок и кнопки на одной строке -->
-<div class="d-flex justify-content-between align-items-start mb-3">
-  <div>
-    <h2 class="mb-1">{{ book.title }}</h2>
-    <p class="text-muted mb-0">{{ book.premise }}</p>
-  </div>
-
-  <div class="d-flex gap-2">
-
-    <!-- Кнопка "Удалить книгу" -->
-    <button 
-      hx-post="/delete-book" 
-      hx-confirm="Удалить книгу безвозвратно?" 
-      class="btn btn-danger btn-sm"
-      name="book_id"
-      value="{{ book.id }}"
-    >
-      🗑 Удалить
-    </button>
-  </div>
+  <!-- Кнопка "Удалить" — справа, обычного размера -->
+  <button 
+    hx-post="/delete-book" 
+    hx-confirm="Удалить книгу безвозвратно?" 
+    class="btn btn-danger btn-sm"
+    name="book_id"
+    value="{{ book.id }}"
+  >
+    🗑 Удалить
+  </button>
 </div>
 
-    <!-- Кнопка "Сгенерировать главы" -->
-    <button 
-      hx-post="/generate-chapters" 
-      hx-confirm="Сгенерировать отмеченные главы?" 
-      hx-target="#outline-table" 
-      hx-swap="innerHTML"
-      class="btn btn-success btn-sm"
-      hx-indicator="#indicator"
-    >
-      📚 Сгенерировать
-    </button>
+<!-- Заголовок и премиса -->
+<h2>{{ book.title }}</h2>
+<p class="text-muted">{{ book.premise }}</p>
+
+<!-- Кнопка "Сгенерировать главы" -->
+<button 
+  hx-post="/generate-chapters" 
+  hx-confirm="Сгенерировать отмеченные главы?" 
+  hx-target="#outline-table" 
+  hx-swap="innerHTML"
+  class="btn btn-success btn-sm"
+  hx-indicator="#indicator"
+>
+  📚 Сгенерировать отмеченные главы
+</button>
 
 <!-- Индикатор загрузки -->
-<div id="indicator" class="htmx-indicator mt-2 mb-3 text-end">⏳ Идёт генерация глав...</div>
+<div id="indicator" class="htmx-indicator mt-2 mb-3 text-end">⏳ Идёт генерация глав, ожидайте...</div>
 
 <!-- Таблица сюжета -->
 <div id="outline-table">
