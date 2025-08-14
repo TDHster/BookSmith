@@ -26,11 +26,15 @@ class Settings(BaseSettings):
     
     OUTLINE_FILE: str = "book_outline.xlsx"
     CHAPTERS_DIR: str = "chapters"
-    DEFAULT_LANGUAGE: str
+    DEFAULT_LANGUAGE: str = Field(default="Русский", env="DEFAULT_LANGUAGE")
     LOG_LEVEL: str = "INFO"
     BOOKS_DIR: str = "books"
     
     CHAPTER_LENGHT: str = "800-1200 words" # for prompt
+    
+    DB_PATH: str = Field(default="sqlite:///storywriter.db", env="DATABASE_URL")
+    
+    WEB_APP_SECRET_KEY: str = Field(default="super-secret-key", env="WEB_APP_SECRET_KEY")
 
 def get_settings():
     return Settings()
