@@ -17,14 +17,14 @@ def main(book_id: int, user_id: int, language: str = settings.DEFAULT_LANGUAGE):
     # Проверяем, что книга существует и принадлежит пользователю
     book = session.query(Book).filter(Book.id == book_id, Book.user_id == user_id).first()
     if not book:
-        logger.error(f"Книга {book_id} не найдена или доступ запрещён для user_id={user_id}")
+        logger.error(f"Книга {book_id} не найдена или доступ запрещён для {user_id=}")
         return
 
     llm = LLMClientFactory.create_client(language)
     generator = BookGenerator(llm)
     manager = OutlineManager(session)
 
-    logger.debug(f"Запуск генерации глав для книги '{book.title}' (ID: {book_id})")
+    logger.debug(f"Запуск генерации глав для книги '{book.title}' {book_id=}")
 
     # Загружаем структуру книги
     data = manager.load_outline(book_id)
