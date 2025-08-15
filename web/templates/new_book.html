@@ -1,0 +1,31 @@
+<!-- web/templates/new_book.html -->
+{% extends "base.html" %}
+
+{% block content %}
+
+<!-- Хлебные крошки -->
+<nav aria-label="breadcrumb">
+  <ol class="breadcrumb">
+    <li class="breadcrumb-item"><a href="/books">Мои книги</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Новая книга</li>
+  </ol>
+</nav>
+
+<!-- Заголовок и форма -->
+<h2>Создать новую книгу</h2>
+<p class="text-muted">Введите название и описание сюжета. По сюжету система сгенерирует структуру книги.</p>
+
+<form hx-post="/create-book" hx-indicator="#spinner">
+  <div class="mb-3">
+    <label class="form-label">Название книги</label>
+    <input type="text" name="title" class="form-control" value="Новая книга" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Описание сюжета</label>
+    <textarea name="description" class="form-control" rows="3" placeholder="Например: Герой отправляется в путь, чтобы спасти мир" required></textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Сгенерировать сюжет</button>
+  <div class="htmx-indicator" id="spinner">⏳ Идёт генерация...</div>
+</form>
+
+{% endblock %}

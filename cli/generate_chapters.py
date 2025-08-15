@@ -1,73 +1,89 @@
-import argparse
-from pathlib import Path
-import pandas as pd
+# cli/generate_chapters.py
 from config.settings import settings
+from infrastructure.database.models import Book, Chapter
+from infrastructure.database import init_db, get_session
 from infrastructure.outline_manager import OutlineManager
 from domain.book_logic import BookGenerator
 from infrastructure.llm_client import LLMClientFactory
 from logger import logger
+import argparse
 
-def setup_directories():
-    Path(settings.CHAPTERS_DIR).mkdir(exist_ok=True)
 
-def main(language):
-    setup_directories()
+def main(book_id: int, user_id: int, language: str = settings.DEFAULT_LANGUAGE):
+    # Инициализируем БД
+    Session = init_db(settings.DB_URL)
+    session = get_session()
+
+    # Проверяем, что книга существует и принадлежит пользователю
+    book = session.query(Book).filter(Book.id == book_id, Book.user_id == user_id).first()
+    if not book:
+        logger.error(f"Книга {book_id} не найдена или доступ запрещён для {user_id=}")
+        return
+
     llm = LLMClientFactory.create_client(language)
     generator = BookGenerator(llm)
-    manager = OutlineManager()
-    
+    manager = OutlineManager(session)
+
+    logger.debug(f"Запуск генерации глав для книги '{book.title}' {book_id=}")
+
     # Загружаем структуру книги
-    df = manager.load_outline()
-    storylines = [col for col in df.columns if col not in ["Chapter", "Title", "Generate", "Summary", "File"]]
-    
-    logger.debug("Starting generating chapters...")
-    
-    # Сортируем главы по номеру
-    df = df.sort_values(by="Chapter")
-    
-    for index, row in df.iterrows():
-        if row["Generate"] != "✅": # TODO fix to any not true value
+    data = manager.load_outline(book_id)
+    if not data:
+        logger.error(f"Не удалось загрузить сюжет для книги {book_id}")
+        return
+
+    storylines = data["storylines"]
+    chapters = sorted(data["chapters"], key=lambda x: x["Chapter"])
+
+    # Генерируем главы
+    for row in chapters:
+        if row.get("Generate") != "✅":
             continue
-        
+
         chapter_num = int(row["Chapter"])
-        
-        # 1. Перед каждой генерацией заново читаем весь Excel
-        current_df = manager.load_outline()
-        
-        # 2. Собираем саммари всех предыдущих глав
+        logger.info(f"Generating chapter {chapter_num}...")
+
+        # Собираем контекст предыдущих глав
         previous_summaries = []
-        for _, prev_row in current_df.iterrows():
-            prev_chapter_num = int(prev_row["Chapter"])
-            if prev_chapter_num < chapter_num and prev_row["Summary"] and not pd.isna(prev_row["Summary"]):
-                previous_summaries.append(f"Chapter {prev_chapter_num}: {prev_row['Summary']}")
-        
-        # 3. Подготавливаем данные главы
+        for ch in chapters:
+            prev_num = int(ch["Chapter"])
+            if prev_num < chapter_num and ch.get("Summary"):
+                previous_summaries.append(f"Глава {prev_num}: {ch['Summary']}")
+
+        # Подготовка данных
         chapter_data = {
             "chapter": chapter_num,
             "title": row["Title"],
-            "events": {sl: row[sl] for sl in storylines}
+            "events": {sl: row[sl] for sl in storylines if sl in row}
         }
-        
-        # 4. Генерируем главу
-        logger.debug(f"Generating chapter {chapter_num}...")
+
+        # Генерация
         chapter_text, summary = generator.generate_chapter(
-            chapter_data,
-            "Generated from outline",
-            storylines,
-            previous_summaries,
+            chapter_data=chapter_data,
+            book_description=book.premise,
+            storylines=storylines,
+            previous_summaries=previous_summaries,
             chapter_length=settings.CHAPTER_LENGHT
         )
-        
-        # 5. Сохраняем главу в файл
-        filename = f"{settings.CHAPTERS_DIR}/chapter_{chapter_num}.txt"
-        with open(filename, "w", encoding="utf-8") as f:
-            f.write(chapter_text)
-        
-        # 6. Обновляем Excel (снимаем галочку и добавляем саммари)
-        manager.update_outline(chapter_num, summary, filename)
-        logger.debug(f"Chapter {chapter_num} generated. Summary: {summary[:50]}...")
-    
-    logger.info("All chapters generated!")
+
+        # Сохранение напрямую в БД
+        manager.update_chapter_summary(
+            book_id=book_id,
+            chapter_number=chapter_num,
+            summary=summary,
+            content=chapter_text  # весь текст — в базу
+        )
+
+        logger.debug(f"✅ Глава {chapter_num} сохранена в БД. Summary: {summary[:60]}...")
+
+    logger.info(f"Generating for'{book.title}' finished.")
+
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Сгенерировать главы книги")
+    parser.add_argument("--book-id", type=int, required=True, help="ID книги")
+    parser.add_argument("--user-id", type=int, default=1, help="ID пользователя")
+    parser.add_argument("--language", default="gemini", help="LLM: gemini, openai и т.д.")
+    args = parser.parse_args()
+
+    main(language=args.language, book_id=args.book_id, user_id=args.user_id)

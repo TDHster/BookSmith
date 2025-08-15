@@ -1,0 +1,68 @@
+<!-- web/templates/book_outline.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<input type="hidden" name="book_id" value="{{ book.id }}">
+
+<!-- Хлебные крошки и кнопка "Удалить" -->
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb mb-0">
+      <li class="breadcrumb-item"><a href="/books">Мои книги</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ book.title }}</li>
+    </ol>
+  </nav>
+
+  <button 
+    hx-post="/delete-book" 
+    hx-confirm="Удалить книгу безвозвратно?" 
+    class="btn btn-danger btn-sm"
+    name="book_id"
+    value="{{ book.id }}"
+  >
+    🗑 Удалить
+  </button>
+</div>
+
+<!-- Заголовок -->
+<h2>{{ book.title }}</h2>
+
+<form class="mb-3"
+      hx-post="/regenerate-outline"
+      hx-target="#outline-table"
+      hx-swap="innerHTML"
+      hx-indicator="#regen-indicator"
+      enctype="application/x-www-form-urlencoded">
+
+  <input type="hidden" name="book_id" value="{{ book.id }}">
+
+  <div class="mb-3">
+    <label class="form-label">Описание сюжета</label>
+    <textarea name="premise" class="form-control" rows="3" required>{{ book.premise }}</textarea>
+  </div>
+
+  <button type="submit" class="btn btn-warning btn-sm">🔄 Перегенерировать сюжетные линии</button>
+  <div id="regen-indicator" class="htmx-indicator ms-2">⏳ Идёт генерация...</div>
+</form>
+
+<!-- Кнопка "Сгенерировать главы" -->
+<button 
+  hx-post="/generate-chapters" 
+  hx-confirm="Сгенерировать отмеченные главы?" 
+  hx-target="#outline-table" 
+  hx-swap="innerHTML"
+  class="btn btn-success btn-sm"
+  hx-indicator="#indicator"
+>
+  📚 Сгенерировать отмеченные главы
+</button>
+
+<!-- Индикатор загрузки -->
+<div id="indicator" class="htmx-indicator mt-2 mb-3 text-end">⏳ Идёт генерация глав, ожидайте...</div>
+
+<!-- Таблица сюжета -->
+<div id="outline-table">
+  {% include "book_outline_table.html" %}
+</div>
+
+{% endblock %}

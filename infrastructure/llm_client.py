@@ -25,8 +25,10 @@ class GeminiClient(LLMClient):
         self.genai.configure(api_key=settings.GEMINI_API_KEY)
         logger.debug(f'Using language: {language}')
         system_instruction = (
-            f"You are a professional writer creating content in {self.language}, use only this language in answer. "
-            "Respond with well-structured, engaging narratives."
+            # f"You are a professional writer creating content in {self.language}, use only {self.language} in answer. "
+            # "Respond with well-structured, engaging narratives."
+
+            "Ты — профессиональный писатель, создающий текст на русском языке. Отвечай только на русском. Структурируй ответ чётко и логично, используя живой и увлекательный стиль повествования."
         )
         
         self.model = genai.GenerativeModel(
@@ -39,6 +41,7 @@ class GeminiClient(LLMClient):
         if token_count > 10000:
             logger.warning(f"Long Gemini prompt: {token_count} tokens")
         
+        # logger.debug(f'{prompt=}')
         response = self.model.generate_content(
             prompt,
             generation_config=self.genai.GenerationConfig(temperature=0.7)
@@ -78,8 +81,8 @@ class OpenAIClient(LLMClient):
 class LLMClientFactory:
     """Фабрика для создания LLM клиентов"""
     @staticmethod
-    def create_client(language: str) -> LLMClient:
-        provider = settings.LLM_PROVIDER.lower()
+    def create_client(language: str, provider='gemini') -> LLMClient:
+        # provider = settings.LLM_PROVIDER.lower()
         
         if provider == "gemini":
             return GeminiClient(language)

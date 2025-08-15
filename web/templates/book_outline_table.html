@@ -1,0 +1,65 @@
+<!-- web/templates/book_outline_table.html -->
+<table class="table table-bordered">
+    <thead class="table-light">
+      <tr>
+        <th>Глава</th>
+        <th>Название</th>
+        <th>Генерировать</th>
+        {% for sl in storylines %}
+        <th>{{ sl }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for ch in chapters %}
+      <tr>
+        <td>{{ ch.Chapter }}</td>
+        <td>
+          {% if ch.Content %}
+            <a href="/chapter/{{ book.id }}/{{ ch.Chapter }}" class="text-decoration-none">
+              <strong>{{ ch.Title }}</strong>
+            </a>
+          {% else %}
+            <span class="text-muted">{{ ch.Title }}</span>
+          {% endif %}
+        </td>
+        <td>
+          {% if ch.Generate == "✅" %}
+            <input 
+              type="checkbox" 
+              hx-post="/toggle-chapter" 
+              hx-include="[name=book_id]" 
+              hx-vals='{"chapter_num": {{ ch.Chapter }}, "enabled": false}' 
+              hx-swap="outerHTML" 
+              checked
+            >
+          {% else %}
+            <input 
+              type="checkbox" 
+              hx-post="/toggle-chapter" 
+              hx-include="[name=book_id]" 
+              hx-vals='{"chapter_num": {{ ch.Chapter }}, "enabled": true}' 
+              hx-swap="outerHTML"
+            >
+          {% endif %}
+        </td>
+        {% for sl in storylines %}
+        <td>
+            <textarea 
+              name="text"  
+              class="form-control form-control-sm"
+              hx-post="/update-event"
+              hx-include="[name=book_id]"
+              hx-vals='{"chapter_num": {{ ch.Chapter }}, "storyline": "{{ sl }}"}'
+              hx-trigger="blur"
+              hx-target="this"
+              hx-swap="outerHTML"
+              rows="6"
+              style="min-height: 60px; font-size: 0.9rem; padding: 4px;"
+            >{{ ch[sl] }}</textarea>
+          </td>     
+          {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>

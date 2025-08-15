@@ -6,3 +6,7 @@ openpyxl
 python-docx
 pytest
 pytest-mock
+
+Flask
+htmx
+sqlalchemy
