@@ -1,11 +1,10 @@
 # infrastructure/database/models.py
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, DateTime, create_engine
-from sqlalchemy.orm import declarative_base, relationship, sessionmaker
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, DateTime
+from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime
-from config.settings import settings
-from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = declarative_base()
+
 
 class User(Base):
     __tablename__ = 'users'
@@ -65,56 +64,3 @@ class Chapter(Base):
 
     book = relationship("Book", back_populates="chapters")
     plot_events = relationship("PlotEvent", back_populates="chapter")
-
-
-# Глобальные переменные
-engine = None
-Session = None
-
-
-def setup_database(db_url: str = settings.DB_PATH):
-    """
-    Инициализирует базу данных: создаёт таблицы и добавляет тестовых пользователей.
-    """
-    global engine, Session
-
-    # Создаём движок
-    engine = create_engine(db_url, echo=False, connect_args={"check_same_thread": False})
-    Session = sessionmaker(bind=engine)
-
-    # Создаём таблицы
-    Base.metadata.create_all(engine)
-
-    # Добавляем тестовых пользователей, если их нет
-    session = Session()
-    try:
-        from sqlalchemy import select
-        if session.query(User).first() is None:
-            users = [
-                User(
-                    username="admin",
-                    email="admin@example.com",
-                    # password="admin12344494949494"  # В продакшене — хэшировать!
-                    password=generate_password_hash("admin12344494949494")  # 🔥 Хэшируем
-
-                ),
-                User(
-                    username="writer",
-                    email="writer@example.com",
-                    # password="writer1449494848474723"
-                    password=generate_password_hash("writer1449494848474723")  # 🔥 Хэшируем
-
-                ),
-            ]
-            session.add_all(users)
-            session.commit()
-            print("✅ Созданы тестовые пользователи: admin, writer")
-        else:
-            print("ℹ️ Пользователи уже существуют")
-    except Exception as e:
-        print(f"❌ Ошибка при добавлении пользователей: {e}")
-        session.rollback()
-    finally:
-        session.close()
-
-    return Session
