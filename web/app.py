@@ -297,6 +297,8 @@ def update_event():
               hx-trigger="blur"
               hx-target="this"
               hx-swap="outerHTML"
+              rows="6"
+
               style="min-height: 60px; font-size: 0.9rem; padding: 4px;"
             >{new_text}</textarea>
             '''
@@ -308,6 +310,61 @@ def update_event():
         logger.error(f"Ошибка при обновлении события: {e}")
         return f"<div class='text-danger'>Ошибка: {str(e)}</div>", 500
 
+
+@app.route("/regenerate-outline", methods=["POST"])
+def regenerate_outline():
+    try:
+        print("Form data:", dict(request.form))
+        user_id = get_current_user_id()
+
+        # Проверяем, что данные пришли
+        if 'book_id' not in request.form:
+            return "<div class='alert alert-danger'>Не передан book_id</div>", 400
+        if 'premise' not in request.form:
+            return "<div class='alert alert-danger'>Не передано описание сюжета</div>", 400
+
+        book_id = int(request.form["book_id"])
+        new_premise = request.form["premise"].strip()
+
+        if not new_premise:
+            return "<div class='alert alert-danger'>Описание сюжета не может быть пустым</div>", 400
+
+        session = Session()
+        try:
+            book = session.query(Book).filter(Book.id == book_id, Book.user_id == user_id).first()
+            if not book:
+                return "<div class='alert alert-danger'>Доступ запрещён</div>", 403
+
+            manager = OutlineManager(session)
+            manager.delete_book(book_id, user_id)
+
+            llm = LLMClientFactory.create_client(language='gemini')
+            generator = BookGenerator(llm)
+            storylines, chapters = generator.generate_outline(new_premise)
+
+            manager.save_outline(
+                book_title=book.title,
+                premise=new_premise,
+                storylines=storylines,
+                chapters=chapters,
+                user_id=user_id
+            )
+
+            data = manager.load_outline(book_id)
+            if not data:
+                return "<div class='alert alert-danger'>Не удалось загрузить сюжет</div>", 500
+
+            return render_template("book_outline_table.html",
+                                 book=book,
+                                 storylines=data["storylines"],
+                                 chapters=data["chapters"])
+
+        finally:
+            session.close()
+
+    except Exception as e:
+        logger.error(f"Ошибка при перегенерации сюжета: {e}")
+        return f"<div class='alert alert-danger'>Ошибка: {str(e)}</div>", 500 
 
 app.secret_key = settings.WEB_APP_SECRET_KEY
     
