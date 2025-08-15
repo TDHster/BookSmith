@@ -11,7 +11,7 @@ engine = None
 Session = None
 
 
-def init_db(db_url: str = settings.DB_PATH):
+def init_db(db_url: str = settings.DATABASE_URL):
     global engine, Session
 
     logger.debug("🔧 1. Запуск init_db")

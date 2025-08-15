@@ -4,7 +4,7 @@ from config.settings import settings
 from infrastructure.database import init_db, get_session
 
 # Инициализируем БД
-Session = init_db(settings.DB_URL)  # возвращает Session из setup.py
+Session = init_db(settings.DATABASE_URL)  # возвращает Session из setup.py
 
 app = Flask(__name__)
 app.secret_key = settings.WEB_APP_SECRET_KEY
@@ -24,4 +24,4 @@ init_outline_routes(app)
 init_delete_routes(app)
 
 if __name__ == "__main__":
-    app.run(debug=True, port=8000)
+    app.run(host="0.0.0.0", debug=False, use_reloader=False, port=8000)

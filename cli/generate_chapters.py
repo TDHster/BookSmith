@@ -11,7 +11,7 @@ import argparse
 
 def main(book_id: int, user_id: int, language: str = settings.DEFAULT_LANGUAGE):
     # Инициализируем БД
-    Session = init_db(settings.DB_URL)
+    Session = init_db(settings.DATABASE_URL)
     session = get_session()
 
     # Проверяем, что книга существует и принадлежит пользователю

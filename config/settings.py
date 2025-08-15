@@ -9,7 +9,6 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8"
     )
-    DB_URL: str = "sqlite:///storywriter.db"
 
     LLM_PROVIDER: str = Field(default="gemini", env="LLM_PROVIDER")  # gemini, openai, etc.
 
@@ -24,7 +23,6 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str = Field(default="", env="OPENAI_API_KEY")
     OPENAI_MODEL: str = Field(default="gpt-4-turbo", env="OPENAI_MODEL")
     
-    OUTLINE_FILE: str = "book_outline.xlsx"
     CHAPTERS_DIR: str = "chapters"
     DEFAULT_LANGUAGE: str = Field(default="Русский", env="DEFAULT_LANGUAGE")
     LOG_LEVEL: str = "INFO"
@@ -32,8 +30,8 @@ class Settings(BaseSettings):
     
     CHAPTER_LENGHT: str = "800-1200 words" # for prompt
     
-    DB_PATH: str = Field(default="sqlite:///storywriter.db", env="DATABASE_URL")
-    
+    DATABASE_URL: str = Field(default="sqlite:////app/data/storywriter.db", env="DATABASE_URL")
+  
     WEB_APP_SECRET_KEY: str = Field(default="super-secret-key", env="WEB_APP_SECRET_KEY")
 
 def get_settings():

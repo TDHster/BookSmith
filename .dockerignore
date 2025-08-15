@@ -1,0 +1,13 @@
+# .dockerignore
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+.git
+.gitignore
+.env
+venv/
+node_modules/
+instance/
+storywriter.db

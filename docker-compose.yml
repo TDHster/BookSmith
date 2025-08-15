@@ -1,0 +1,22 @@
+# docker-compose.yml
+
+services:
+  app:
+    build: .
+    ports:
+      - "5680:8000"
+    env_file:
+      - .env
+    environment:
+      - FLASK_ENV=production
+      - DATABASE_URL=${DATABASE_URL}
+      - WEB_APP_SECRET_KEY=${WEB_APP_SECRET_KEY}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE}
+      - FLASK_ENV=${FLASK_ENV}
+    volumes:
+      - data_volume:/app/data
+    restart: unless-stopped
+
+volumes:
+  data_volume:

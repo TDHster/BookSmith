@@ -9,7 +9,7 @@ from logger import logger
 
 def main(description: str, language: str, title: str = "Новая книга"):
     # Инициализируем БД
-    Session = init_db(settings.DB_URL)
+    Session = init_db(settings.DATABASE_URL)
     session = get_session()
 
     # Генерируем сюжет
