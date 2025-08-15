@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from .models import Base, User
 from config.settings import settings
 from werkzeug.security import generate_password_hash
+from logger import logger
 
 # Глобальные переменные
 engine = None
@@ -11,20 +12,18 @@ Session = None
 
 
 def init_db(db_url: str = settings.DB_PATH):
-    """
-    Инициализирует движок, создаёт таблицы, добавляет тестовых пользователей.
-    Возвращает фабрику сессий.
-    """
     global engine, Session
 
-    # Создаём движок
+    logger.debug("🔧 1. Запуск init_db")
     engine = create_engine(db_url, echo=False, connect_args={"check_same_thread": False})
+    logger.debug("✅ 2. Движок создан")
+
     Session = sessionmaker(bind=engine)
+    logger.debug("✅ 3. Session фабрика создана")
 
-    # Создаём таблицы
     Base.metadata.create_all(engine)
+    logger.debug("✅ 4. Таблицы созданы")
 
-    # Добавляем тестовых пользователей, если их нет
     session = Session()
     try:
         if session.query(User).first() is None:
@@ -42,13 +41,16 @@ def init_db(db_url: str = settings.DB_PATH):
             ]
             session.add_all(users)
             session.commit()
-            print("✅ Созданы тестовые пользователи: admin, writer")
+            print("✅ 5. Пользователи добавлены")
         else:
-            print("ℹ️ Пользователи уже существуют")
+            print("ℹ️ 5. Пользователи уже есть")
     except Exception as e:
         print(f"❌ Ошибка при добавлении пользователей: {e}")
         session.rollback()
+        raise  # 🔥 Покажем ошибку
     finally:
         session.close()
 
-    return Session
+    print("✅ 6. init_db завершён, возвращаем Session")
+    return Session  # ✅ Обязательно
+

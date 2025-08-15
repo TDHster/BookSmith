@@ -1,7 +1,7 @@
 # cli/generate_outline.py
 import argparse
 from infrastructure.llm_client import LLMClientFactory
-from infrastructure.database import init_db, Session
+from infrastructure.database import init_db, get_session
 from infrastructure.outline_manager import OutlineManager
 from domain.book_logic import BookGenerator
 from config.settings import settings
@@ -10,7 +10,7 @@ from logger import logger
 def main(description: str, language: str, title: str = "Новая книга"):
     # Инициализируем БД
     Session = init_db(settings.DB_URL)
-    session = Session()
+    session = get_session()
 
     # Генерируем сюжет
     llm = LLMClientFactory.create_client(language)

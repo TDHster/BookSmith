@@ -15,18 +15,38 @@ class OutlineManager:
         premise: str,
         storylines: list,
         chapters: list,
-        user_id: int = 1
+        user_id: int,
+        book_id: int = None  # ✅ Добавь book_id
     ):
         """
         Сохраняет книгу, сюжетные линии и события глав в БД.
+        Если book_id передан — обновляет существующую книгу.
         """
-        # Создаём книгу
-        book = Book(
-            title=book_title,
-            premise=premise,
-            user_id=user_id
-        )
-        self.session.add(book)
+        # Проверяем, существует ли уже книга
+        if book_id:
+            book = self.session.query(Book).filter(Book.id == book_id, Book.user_id == user_id).first()
+            if book:
+                # Обновляем поля
+                book.title = book_title
+                book.premise = premise
+            else:
+                # Книга не найдена — создаём новую
+                book = Book(
+                    id=book_id,  # сохраняем id
+                    title=book_title,
+                    premise=premise,
+                    user_id=user_id
+                )
+                self.session.add(book)
+        else:
+            # Создаём новую книгу (как раньше)
+            book = Book(
+                title=book_title,
+                premise=premise,
+                user_id=user_id
+            )
+            self.session.add(book)
+
         self.session.flush()  # Получаем book.id
 
         # Создаём сюжетные линии
@@ -55,7 +75,7 @@ class OutlineManager:
             for storyline_name, event_desc in ch["events"].items():
                 if storyline_name in line_map:
                     if not event_desc or not str(event_desc).strip():
-                        continue  # пропускаем пустые
+                        continue
                     event_desc_str = str(event_desc).strip()
                     if not event_desc_str:
                         continue

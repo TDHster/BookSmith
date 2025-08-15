@@ -1,7 +1,7 @@
 # cli/generate_chapters.py
 from config.settings import settings
 from infrastructure.database.models import Book, Chapter
-from infrastructure.database import init_db, Session
+from infrastructure.database import init_db, get_session
 from infrastructure.outline_manager import OutlineManager
 from domain.book_logic import BookGenerator
 from infrastructure.llm_client import LLMClientFactory
@@ -12,7 +12,7 @@ import argparse
 def main(book_id: int, user_id: int, language: str = settings.DEFAULT_LANGUAGE):
     # Инициализируем БД
     Session = init_db(settings.DB_URL)
-    session = Session()
+    session = get_session()
 
     # Проверяем, что книга существует и принадлежит пользователю
     book = session.query(Book).filter(Book.id == book_id, Book.user_id == user_id).first()

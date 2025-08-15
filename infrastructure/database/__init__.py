@@ -1,7 +1,10 @@
 # infrastructure/database/__init__.py
-"""
-Инициализация базы данных и экспорт сессии.
-"""
-from .setup import init_db, Session, engine
+from .setup import init_db as _init_db
 
-# Теперь можно: from infrastructure.database import init_db, Session
+def get_session():
+    from .setup import Session  # ✅ Импортируем ВНУТРИ функции — всегда свежий Session
+    if Session is None:
+        raise RuntimeError("База данных не инициализирована. Вызовите init_db() сначала.")
+    return Session()
+
+init_db = _init_db
