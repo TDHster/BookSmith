@@ -34,7 +34,7 @@ def init_auth_routes(app):
                 user = session_db.query(User).filter(User.username == username).first()
                 if user and check_password_hash(user.password, password):
                     failed_attempts[ip] = 0
-                    session_db["user_id"] = user.id
+                    session["user_id"] = user.id
                     logger.info(f'User {user.username} logged in from ip {ip}')
                     return redirect("/books")
                 else:
