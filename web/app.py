@@ -9,13 +9,10 @@ from infrastructure.llm_client import LLMClientFactory
 from infrastructure.database.models import Book, Chapter, PlotLine, PlotEvent, User
 from cli.generate_chapters import main as generate_chapters_cli
 from sqlalchemy import delete
-import time
+from time import sleep
 from collections import defaultdict
 import logging
-
-# Настройка логов
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from logger import logger
 
 app = Flask(__name__)
 
@@ -46,7 +43,7 @@ def login():
         if attempts > 1:
             delay = 2 ** (attempts - 2)  # 1, 2, 4, 8...
             delay = min(delay, 30)      # максимум 30 сек
-            time.sleep(delay)
+            sleep(delay)
 
         session_db = Session()
         try:
@@ -56,8 +53,10 @@ def login():
                 # ✅ Успех — сбрасываем счётчик
                 failed_attempts[ip] = 0
                 session["user_id"] = user.id
+                logger.info(f'User {user} logged in from ip {ip}')
                 return redirect("/books")
             else:
+                logger.error(f'User {user} failed logged in from ip {ip} attempt {attempts}')
                 # ❌ Ошибка — оставляем счётчик
                 return "<div class='alert alert-danger'>Неверный логин или пароль</div>", 401
         finally:
@@ -109,6 +108,7 @@ def create_book():
         # 🔥 Возвращаем HX-Redirect на страницу редактирования
         response = app.response_class()
         response.headers["HX-Redirect"] = f"/book/{book.id}"
+        logger.info(f'Creating book {title} {description}')
         return response
 
     except Exception as e:
@@ -124,7 +124,8 @@ def generate_chapters():
         user_id = get_current_user_id()
         # book_id = 1  # временно
         book_id = int(request.form["book_id"])
-        generate_chapters_cli(language="Русский", book_id=book_id, user_id=user_id)
+        logger.info(f"Generating chapters for {book_id=}")
+        generate_chapters_cli(book_id=book_id, user_id=user_id) 
 
         session = Session()
         try:
@@ -176,11 +177,7 @@ def toggle_chapter():
 
 
 def get_current_user_id():
-    # Пока используем фиксированного пользователя
-    # В будущем: session["user_id"] = 42 после входа
-    # session["user_id"] = user.id 
     return session.get("user_id")
-    # return session.get("user_id", 1)  # fallback на 1
 
 
 @app.route("/books")
@@ -228,6 +225,7 @@ def delete_book():
         try:
             manager = OutlineManager(session)
             manager.delete_book(book_id, user_id)
+            logger.info(f"Book {book_id=} deleted")
             # Перенаправляем на список книг
             return """
             <script>

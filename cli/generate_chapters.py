@@ -9,7 +9,7 @@ from logger import logger
 import argparse
 
 
-def main(language: str, book_id: int, user_id: int = 1):
+def main(book_id: int, user_id: int, language: str = settings.DEFAULT_LANGUAGE):
     # Инициализируем БД
     Session = init_db(settings.DB_URL)
     session = Session()
@@ -41,7 +41,7 @@ def main(language: str, book_id: int, user_id: int = 1):
             continue
 
         chapter_num = int(row["Chapter"])
-        logger.info(f"Генерация главы {chapter_num}...")
+        logger.info(f"Generating chapter {chapter_num}...")
 
         # Собираем контекст предыдущих глав
         previous_summaries = []
@@ -74,9 +74,9 @@ def main(language: str, book_id: int, user_id: int = 1):
             content=chapter_text  # весь текст — в базу
         )
 
-        logger.info(f"✅ Глава {chapter_num} сохранена в БД. Summary: {summary[:60]}...")
+        logger.debug(f"✅ Глава {chapter_num} сохранена в БД. Summary: {summary[:60]}...")
 
-    logger.info(f"Генерация книги '{book.title}' завершена.")
+    logger.info(f"Generating for'{book.title}' finished.")
 
 
 if __name__ == "__main__":
