@@ -3,6 +3,7 @@ from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, DateT
 from sqlalchemy.orm import declarative_base, relationship, sessionmaker
 from datetime import datetime
 from config.settings import settings
+from werkzeug.security import generate_password_hash, check_password_hash
 
 Base = declarative_base()
 
@@ -93,12 +94,16 @@ def setup_database(db_url: str = settings.DB_PATH):
                 User(
                     username="admin",
                     email="admin@example.com",
-                    password="admin12344494949494"  # В продакшене — хэшировать!
+                    # password="admin12344494949494"  # В продакшене — хэшировать!
+                    password=generate_password_hash("admin12344494949494")  # 🔥 Хэшируем
+
                 ),
                 User(
                     username="writer",
                     email="writer@example.com",
-                    password="writer1449494848474723"
+                    # password="writer1449494848474723"
+                    password=generate_password_hash("writer1449494848474723")  # 🔥 Хэшируем
+
                 ),
             ]
             session.add_all(users)

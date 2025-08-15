@@ -1,5 +1,6 @@
 # web/app.py
 from flask import Flask, render_template, request, session, redirect
+from werkzeug.security import generate_password_hash, check_password_hash
 from config.settings import settings
 from infrastructure.database import init_db, Session
 from infrastructure.outline_manager import OutlineManager
@@ -50,7 +51,8 @@ def login():
         session_db = Session()
         try:
             user = session_db.query(User).filter(User.username == username).first()
-            if user and user.password == password:
+            # if user and user.password == password:
+            if user and check_password_hash(user.password, password):
                 # ✅ Успех — сбрасываем счётчик
                 failed_attempts[ip] = 0
                 session["user_id"] = user.id
