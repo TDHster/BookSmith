@@ -8,6 +8,8 @@ from infrastructure.llm_client import LLMClientFactory
 from infrastructure.database.models import Book, Chapter, PlotLine, PlotEvent, User
 from cli.generate_chapters import main as generate_chapters_cli
 from sqlalchemy import delete
+import time
+from collections import defaultdict
 import logging
 
 # Настройка логов
@@ -19,8 +21,7 @@ app = Flask(__name__)
 # Инициализируем БД
 Session = init_db(settings.DB_URL)
 
-BOOK_ID = 1  # 🔥 Работаем ТОЛЬКО с первой книгой
-
+failed_attempts = defaultdict(int)
 
 @app.route("/")
 def index():
@@ -33,13 +34,29 @@ def login():
         username = request.form["username"]
         password = request.form["password"]
 
+        # 🔒 Увеличиваем счётчик попыток для IP или username
+        # Можно использовать: request.remote_addr (IP) или username
+        # ip = request.remote_addr  # или username, если хочешь по пользователю
+        ip = request.headers.get("X-Forwarded-For", request.remote_addr).split(",")[0]
+        failed_attempts[ip] += 1
+        attempts = failed_attempts[ip]
+
+        # ⏳ Экспоненциальная задержка: 1, 2, 4, 8... секунд
+        if attempts > 1:
+            delay = 2 ** (attempts - 2)  # 1, 2, 4, 8...
+            delay = min(delay, 30)      # максимум 30 сек
+            time.sleep(delay)
+
         session_db = Session()
         try:
             user = session_db.query(User).filter(User.username == username).first()
-            if user and user.password == password:  # В продакшене — хэшировать!
+            if user and user.password == password:
+                # ✅ Успех — сбрасываем счётчик
+                failed_attempts[ip] = 0
                 session["user_id"] = user.id
                 return redirect("/books")
             else:
+                # ❌ Ошибка — оставляем счётчик
                 return "<div class='alert alert-danger'>Неверный логин или пароль</div>", 401
         finally:
             session_db.close()
