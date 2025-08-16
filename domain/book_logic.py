@@ -2,6 +2,7 @@
 import json
 import re
 from logger import logger 
+import unicodedata
 
 MAX_RETRIES = 3
 
@@ -52,11 +53,13 @@ class BookGenerator:
 
 
     def extract_json(self, text: str) -> dict:
-        """Извлекает JSON из текста ответа, обрабатывая различные форматы"""
+        """Извлекает JSON из текста ответа, обрабатывая различные форматы и невидимые символы"""
         if not text or not isinstance(text, str):
             return {}
 
-        # logger.debug(f"🔍 Извлечение JSON из ответа LLM:\n{text[:500]}...")  #  
+        # Удаляем zero-width spaces и другие невидимые символы
+        text = re.sub(r'[\u200b\u200c\u200d\u2060\ufeff]', '', text)  # Основные zero-width
+        text = unicodedata.normalize('NFKC', text)  # Нормализация Unicode
 
         try:
             return json.loads(text)
@@ -67,7 +70,8 @@ class BookGenerator:
         match = re.search(r'```(?:json)?\s*\n(.*?)\n```', text, re.DOTALL | re.IGNORECASE)
         if match:
             try:
-                return json.loads(match.group(1))
+                cleaned = re.sub(r'[\u200b\u200c\u200d\u2060\ufeff]', '', match.group(1))
+                return json.loads(cleaned)
             except json.JSONDecodeError as e:
                 logger.warning(f"Не удалось распарсить JSON из блока: {e}")
 
@@ -76,7 +80,9 @@ class BookGenerator:
         end = text.rfind('}')
         if start != -1 and end != -1 and end > start:
             try:
-                return json.loads(text[start:end+1])
+                fragment = text[start:end+1]
+                fragment = re.sub(r'[\u200b\u200c\u200d\u2060\ufeff]', '', fragment)
+                return json.loads(fragment)
             except json.JSONDecodeError as e:
                 logger.warning(f"Не удалось распарсить JSON из фрагмента: {e}")
 
