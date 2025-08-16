@@ -8,6 +8,8 @@ class Settings(BaseSettings):
     model_config = ConfigDict(
         env_file=".env",
         env_file_encoding="utf-8"
+        # extra: "ignore"  # ✅ Это ключевое!
+
     )
 
     LLM_PROVIDER: str = Field(default="gemini", env="LLM_PROVIDER")  # gemini, openai, etc.
@@ -33,6 +35,7 @@ class Settings(BaseSettings):
     DATABASE_URL: str = Field(default="sqlite:////app/data/storywriter.db", env="DATABASE_URL")
   
     WEB_APP_SECRET_KEY: str = Field(default="super-secret-key", env="WEB_APP_SECRET_KEY")
+    FLASK_ENV: str = Field(default="development", env="FLASK_ENV") 
 
 def get_settings():
     return Settings()

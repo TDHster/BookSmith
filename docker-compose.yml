@@ -9,7 +9,7 @@ services:
       - .env
     environment:
       - FLASK_ENV=production
-      - DATABASE_URL=${DATABASE_URL}
+      - DATABASE_URL=sqlite:////app/data/storywriter.db
       - WEB_APP_SECRET_KEY=${WEB_APP_SECRET_KEY}
       - GEMINI_API_KEY=${GEMINI_API_KEY}
       - DEFAULT_LANGUAGE=${DEFAULT_LANGUAGE}
