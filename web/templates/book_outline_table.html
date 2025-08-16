@@ -24,11 +24,22 @@
         {% endif %}
       </td>
       <td>
-        {% if ch.Generate == "✅" %}
-          <input type="checkbox" ... checked>
-        {% else %}
-          <input type="checkbox" ...>
-        {% endif %}
+        <td>
+          {% if ch.Generate %}
+            <input type="checkbox" 
+                   hx-post="/toggle-chapter" 
+                   hx-include="[name=book_id]" 
+                   hx-vals='{"chapter_num": {{ ch.Chapter }}, "enabled": false}' 
+                   hx-swap="outerHTML" 
+                   checked>
+          {% else %}
+            <input type="checkbox" 
+                   hx-post="/toggle-chapter" 
+                   hx-include="[name=book_id]" 
+                   hx-vals='{"chapter_num": {{ ch.Chapter }}, "enabled": true}' 
+                   hx-swap="outerHTML">
+          {% endif %}
+        </td>
       </td>
       {% for sl in storylines %}
       <td>

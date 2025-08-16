@@ -5,7 +5,9 @@ from sqlalchemy.orm import sessionmaker
 from infrastructure.database import get_session
 from infrastructure.database.models import Book, Chapter  
 from infrastructure.outline_manager import OutlineManager
-from cli.generate_chapters import main as generate_chapters_cli
+# from cli.generate_chapters import main as generate_chapters_cli
+from cli.generate_chapters import generate_chapters_for_book  
+
 from logger import logger
 
 def init_chapter_routes(app):
@@ -14,9 +16,15 @@ def init_chapter_routes(app):
         try:
             user_id = session.get("user_id")
             book_id = int(request.form["book_id"])
-            logger.info(f"Generating chapters for {book_id=}")
-            generate_chapters_cli(book_id=book_id, user_id=user_id)
+            logger.info(f"Запуск генерации глав для {book_id=} (user_id={user_id})")
 
+            # ✅ Вызываем чистую функцию
+            success = generate_chapters_for_book(book_id=book_id, user_id=user_id)
+
+            if not success:
+                return "<div class='alert alert-danger'>Не удалось сгенерировать главы</div>"
+
+            # Перезагружаем данные
             session_db = get_session()
             try:
                 book = session_db.query(Book).filter(Book.id == book_id, Book.user_id == user_id).first()
@@ -38,7 +46,7 @@ def init_chapter_routes(app):
         except Exception as e:
             logger.error(f"Ошибка при генерации глав: {e}")
             return f"<div class='alert alert-danger mt-3'>❌ Ошибка: {str(e)}</div>"
-
+        
     @app.route("/toggle-chapter", methods=["POST"])
     def toggle_chapter():
         user_id = session.get("user_id")

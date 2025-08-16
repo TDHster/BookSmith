@@ -132,7 +132,7 @@ class OutlineManager:
             row = {
                 "Chapter": ch.number,
                 "Title": ch.title,
-                "Generate": "✅" if ch.generate_flag else "",
+                "Generate": ch.generate_flag,
                 "Summary": ch.context_summary or "",  # краткое резюме для LLM
                 "Content": ch.content or ""          # полный текст — для кнопки "Читать"
             }

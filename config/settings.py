@@ -30,7 +30,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
     BOOKS_DIR: str = "books"
     
-    CHAPTER_LENGHT: str = "800-1200 words" # for prompt
+    CHAPTER_LENGTH: str = "800-1200 words" # for prompt
     
     DATABASE_URL: str = Field(default="sqlite:////app/data/storywriter.db", env="DATABASE_URL")
   
