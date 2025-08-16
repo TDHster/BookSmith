@@ -24,43 +24,65 @@ class BookGenerator:
             Включи от 8 до 12 глав. Обеспечь логичное развитие сюжета по всем линиям.
             """
         
-        result = self.llm.generate_text(prompt)
-        # 🔽 Защита: убедимся, что result — строка и не None
-        if not result or not isinstance(result, str):
-            result = "{}"
         try:
-            data = json.loads(result.strip("```json\n").strip("\n```"))
-            return data["storylines"], data["chapters"]
-        except (json.JSONDecodeError, KeyError) as e:
+            result = self.llm.generate_text(prompt)
+            if not result or not isinstance(result, str):
+                result = "{}"
+
+            # ✅ Используем extract_json
+            data = self.extract_json(result)
+
+            if not data:
+                raise ValueError("LLM вернул пустой или нечитаемый ответ")
+
+            storylines = data.get("storylines")
+            chapters = data.get("chapters")
+
+            if not isinstance(storylines, list) or not isinstance(chapters, list):
+                raise ValueError("storylines и chapters должны быть списками")
+
+            if len(storylines) == 0 or len(chapters) == 0:
+                raise ValueError("storylines и chapters не могут быть пустыми")
+
+            return storylines, chapters
+
+        except Exception as e:
+            logger.error(f"Ошибка при генерации сюжета: {e}")
             raise ValueError("Failed to parse LLM response") from e
-    
+
+
     def extract_json(self, text: str) -> dict:
         """Извлекает JSON из текста ответа, обрабатывая различные форматы"""
+        if not text or not isinstance(text, str):
+            return {}
+
+        # logger.debug(f"🔍 Извлечение JSON из ответа LLM:\n{text[:500]}...")  #  
+
         try:
-            # Пытаемся распарсить весь ответ как JSON
             return json.loads(text)
         except json.JSONDecodeError:
-            # Если не получилось, пробуем извлечь JSON из блока кода
-            match = re.search(r'```json\n(.*?)\n```', text, re.DOTALL)
-            if match:
-                try:
-                    return json.loads(match.group(1))
-                except json.JSONDecodeError as e:
-                    logger.error(f"JSON extraction failed: {e}\nText: {text[:500]}...")
-            
-            # Пробуем найти начало и конец JSON вручную
-            start_idx = text.find('{')
-            end_idx = text.rfind('}')
-            if start_idx != -1 and end_idx != -1 and end_idx > start_idx:
-                try:
-                    return json.loads(text[start_idx:end_idx+1])
-                except json.JSONDecodeError as e:
-                    logger.error(f"Manual JSON extraction failed: {e}")
-        
-        # Если ничего не помогло, логируем и возвращаем пустой словарь
-        logger.error(f"Failed to extract JSON from response:\n{text[:1000]}...")
+            pass
+
+        # Пробуем извлечь из ```json ... ```
+        match = re.search(r'```(?:json)?\s*\n(.*?)\n```', text, re.DOTALL | re.IGNORECASE)
+        if match:
+            try:
+                return json.loads(match.group(1))
+            except json.JSONDecodeError as e:
+                logger.warning(f"Не удалось распарсить JSON из блока: {e}")
+
+        # Пробуем найти { ... }
+        start = text.find('{')
+        end = text.rfind('}')
+        if start != -1 and end != -1 and end > start:
+            try:
+                return json.loads(text[start:end+1])
+            except json.JSONDecodeError as e:
+                logger.warning(f"Не удалось распарсить JSON из фрагмента: {e}")
+
+        logger.error(f"❌ Не удалось извлечь JSON из ответа LLM:\n{text}")
         return {}
-    
+
     def generate_chapter(
         self, 
         chapter_data: dict, 

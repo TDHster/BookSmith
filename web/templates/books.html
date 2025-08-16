@@ -2,26 +2,21 @@
 {% extends "base.html" %}
 
 {% block content %}
+<h1 class="mb-4">Мои книги</h1>
 
-<nav class="mb-3">
-  <a href="/logout" class="btn btn-outline-secondary btn-sm">Выход</a>
-</nav>
-
-<h1>Ваши книги</h1>
-
-<a href="/new-book" class="btn btn-primary mb-3">+ Новая книга</a>
-
-{% if books %}
-<ul class="list-group">
+<div class="row">
   {% for book in books %}
-  <li class="list-group-item">
-    <a href="/book/{{ book.id }}">{{ book.title }}</a>
-    <span class="text-muted">— {{ book.premise[:50] }}...</span>
-  </li>
+  <div class="col-md-6 col-lg-4 mb-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <h5 class="card-title">{{ book.title }}</h5>
+        <p class="card-text text-muted small">{{ book.premise[:100] }}...</p>
+        <a href="/book/{{ book.id }}" class="btn btn-primary btn-sm">Открыть</a>
+      </div>
+    </div>
+  </div>
   {% endfor %}
-</ul>
-{% else %}
-<p>У вас пока нет книг. Создайте первую!</p>
-{% endif %}
+</div>
 
+<a href="/new-book" class="btn btn-outline-secondary mt-3">+ Новая книга</a>
 {% endblock %}
