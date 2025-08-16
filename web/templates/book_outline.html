@@ -151,6 +151,9 @@
 </nav>
 
 <h2>{{ book.title }}</h2>
+<div class="mb-3">
+  <button hx-post="/delete-book" hx-confirm="Удалить книгу?" class="btn btn-danger btn-sm float-end" name="book_id" value="{{ book.id }}">🗑 Удалить</button>
+</div>
 
 <form class="mb-3"
       hx-post="/regenerate-outline"
@@ -167,16 +170,30 @@
 
 </form>
 
+
 <div class="mb-3">
   <form hx-post="/generate-chapters" 
-    hx-target="#outline-table" 
-    hx-swap="innerHTML"
-    hx-confirm="Сгенерировать главы?">
-  <input type="hidden" name="book_id" value="{{ book.id }}">
-  <button type="submit" class="btn btn-success btn-sm">📚 Сгенерировать главы</button>
-</form>
-  <button hx-post="/delete-book" hx-confirm="Удалить книгу?" class="btn btn-danger btn-sm float-end" name="book_id" value="{{ book.id }}">🗑 Удалить</button>
+        hx-target="#outline-table" 
+        hx-swap="innerHTML"
+        hx-confirm="Сгенерировать главы?"
+        hx-on::before-request="document.getElementById('spinner-generate').style.display = 'inline'"
+        hx-on::after-request="document.getElementById('spinner-generate').style.display = 'none'">
+    <input type="hidden" name="book_id" value="{{ book.id }}">
+    <button type="submit" class="btn btn-success btn-sm">📚 Сгенерировать главы</button>
+  </form>
+
+  <!-- Индикатор для генерации глав -->
+  <span id="spinner-generate" class="text-muted ms-2" style="display: none;">
+    <span style="margin-left: 8px; font-size: 0.9rem;">Идёт генерация глав...</span>
+    <br>
+    <div class="lds-grid">
+      <div></div><div></div><div></div>
+      <div></div><div></div><div></div>
+      <div></div><div></div><div></div>
+    </div>
+  </span>
 </div>
+
 
 <!-- spinner matrix-->
 <span id="spinner" class="text-muted ms-2" style="display: none;">
