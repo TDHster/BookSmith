@@ -29,26 +29,24 @@ def init_outline_routes(app):
                 manager = OutlineManager(session_db)
                 manager.update_plot_event(book_id, chapter_num, storyline_name, new_text)
 
-                return f'''
-                <textarea 
-                  name="text"  
-                  class="form-control form-control-sm"
-                  hx-post="/update-event"
-                  hx-include="[name=book_id]"
-                  hx-vals='{{"chapter_num": {chapter_num}, "storyline": "{storyline_name}"}}'
-                  hx-trigger="blur"
-                  hx-target="this"
-                  hx-swap="outerHTML"
-                  rows="6"
-                  style="font-size: 0.9rem; padding: 4px;"
-                >{new_text}</textarea>
-                '''
+                # 🔁 Загружаем обновлённый outline
+                data = manager.load_outline(book_id)
+                if not data:
+                    return "<div class='alert alert-danger'>Ошибка загрузки</div>", 500
+
+                # Возвращаем всю таблицу (как в regenerate-outline)
+                return render_template("book_outline_table.html",
+                                    book=book,
+                                    storylines=data["storylines"],
+                                    chapters=data["chapters"])
+
             finally:
                 session_db.close()
 
         except Exception as e:
             logger.error(f"Ошибка при обновлении события: {e}")
-            return f"<div class='text-danger'>Ошибка: {str(e)}</div>", 500
+            return f"<div class='alert alert-danger'>Ошибка: {str(e)}</div>", 500
+
 
     @app.route("/regenerate-outline", methods=["POST"])
     def regenerate_outline():

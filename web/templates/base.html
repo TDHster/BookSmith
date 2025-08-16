@@ -37,59 +37,68 @@
     {% block content %}{% endblock %}
   </div>
 
-    <!-- Модальное окно для редактирования сюжетной линии -->
-    <div class="modal fade" id="editLineModal" tabindex="-1" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Редактировать сюжетную линию</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <form hx-post="/update-line" hx-target="#outline-table">
-            <div class="modal-body">
-              <input type="hidden" name="book_id" id="modal-book-id">
-              <input type="hidden" name="chapter_num" id="modal-chapter-num">
-              <input type="hidden" name="line_name" id="modal-line-name">
-              <div class="mb-3">
-                <label class="form-label">Содержание</label>
-                <textarea name="content" id="modal-content" class="form-control" rows="6"></textarea>
-              </div>
-            </div>
-            <div class="modal-footer">
-              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-              <button type="submit" class="btn btn-primary">Сохранить</button>
-            </div>
-          </form>
-        </div>
+<!-- Модальное окно для редактирования сюжетной линии -->
+<div class="modal fade" id="editLineModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Редактировать сюжетную линию</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
+      <form hx-post="/update-event"
+            hx-target="#outline-table"
+            hx-swap="innerHTML"
+            hx-on::after-request="bootstrap.Modal.getInstance(document.getElementById('editLineModal')).hide();"
+            hx-trigger="submit">
+        <div class="modal-body">
+          <input type="hidden" name="book_id" id="modal-book-id">
+          <input type="hidden" name="chapter_num" id="modal-chapter-num">
+          <input type="hidden" name="storyline" id="modal-line-name">
+          <div class="mb-3">
+            <label class="form-label">Содержание</label>
+            <textarea name="text" id="modal-content" class="form-control" rows="6"></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+          <button type="submit" class="btn btn-primary">Сохранить</button>
+        </div>
+      </form>
     </div>
+  </div>
+</div>
+
   
-    <!-- Инициализация модального окна и обработчиков -->
-    <script>
-      // Убедимся, что DOM загружен
-      document.addEventListener('DOMContentLoaded', function () {
-        // Инициализируем модальное окно Bootstrap
-        const modalElement = document.getElementById('editLineModal');
-        const modal = new bootstrap.Modal(modalElement);
-  
-        // Делаем делегирование событий
-        document.addEventListener('click', function (e) {
-          const cell = e.target.closest('.clickable-cell');
-          if (!cell) return;
-  
-          const bookId = cell.getAttribute('data-book-id');
-          const chapter = cell.getAttribute('data-chapter');
-          const line = cell.getAttribute('data-line');
-          const content = cell.getAttribute('data-content');
-  
-          document.getElementById('modal-book-id').value = bookId;
-          document.getElementById('modal-chapter-num').value = chapter;
-          document.getElementById('modal-line-name').value = line;
-          document.getElementById('modal-content').value = content;
-  
-          modal.show();
-        });
-      });
-    </script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const modalElement = document.getElementById('editLineModal');
+    const modal = new bootstrap.Modal(modalElement);
+
+    document.addEventListener('click', function (e) {
+      const cell = e.target.closest('.clickable-cell');
+      if (!cell) return;
+
+      const bookId = cell.getAttribute('data-book-id');
+      const chapter = cell.getAttribute('data-chapter');
+      const line = cell.getAttribute('data-line');
+      const content = cell.getAttribute('data-content');
+
+      // Убедимся, что элементы существуют
+      document.getElementById('modal-book-id').value = bookId;
+      document.getElementById('modal-chapter-num').value = chapter;
+      document.getElementById('modal-line-name').value = line;
+      document.getElementById('modal-content').value = content;
+
+      modal.show();
+    });
+
+    // Очистка формы при закрытии (опционально)
+    modalElement.addEventListener('hidden.bs.modal', function () {
+      const form = modalElement.querySelector('form');
+      form.reset();
+    });
+  });
+</script>
+
 </body>
 </html>
