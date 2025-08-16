@@ -3,14 +3,12 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
-# Копируем requirements.txt
 COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Устанавливаем без компиляции
-RUN pip install --only-binary=all --no-cache-dir -r requirements.txt
-
-# Копируем код
 COPY . .
 
 EXPOSE 8000
-CMD ["python", "-m", "web.main"]
+
+# Запускаем через Gunicorn
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "--workers", "4", "web.main:app"]

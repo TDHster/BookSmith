@@ -1,5 +1,6 @@
 # requirements.txt
-Flask==3.0.3
+gunicorn
+Flask
 SQLAlchemy==2.0.30
 pydantic-settings>=2.0.0
 pydantic>=2.0.0
