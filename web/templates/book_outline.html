@@ -2,58 +2,34 @@
 {% extends "base.html" %}
 
 {% block content %}
-<!-- Хлебные крошки -->
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
     <li class="breadcrumb-item"><a href="/books">Мои книги</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{ book.title }}</li>
+    <li class="breadcrumb-item active">{{ book.title }}</li>
   </ol>
 </nav>
 
-<h2 class="mb-3">{{ book.title }}</h2>
+<h2>{{ book.title }}</h2>
 
-<!-- Форма перегенерации -->
-<form class="mb-4"
+<form class="mb-3"
       hx-post="/regenerate-outline"
       hx-target="#outline-table"
       hx-swap="innerHTML"
-      hx-indicator=".htmx-indicator"
-      enctype="application/x-www-form-urlencoded">
+      hx-on::before-request="document.getElementById('indicator').style.display = 'inline'"
+      hx-on::after-request="document.getElementById('indicator').style.display = 'none'">
 
   <input type="hidden" name="book_id" value="{{ book.id }}">
+  <input type="hidden" name="premise" value="{{ book.premise }}">
 
-  <div class="mb-3">
-    <label class="form-label">Описание сюжета</label>
-    <textarea name="premise" class="form-control" rows="3" required>{{ book.premise }}</textarea>
-  </div>
-
-  <button type="submit" class="btn btn-warning btn-sm">🔄 Перегенерировать сюжет</button>
+  <button type="submit" class="btn btn-warning btn-sm">🔄 Перегенерировать сюжетные линии</button>
+  <span id="indicator" class="text-muted ms-2" style="display: none;">⏳ Идёт генерация...</span>
 </form>
 
-<!-- Кнопки действий -->
 <div class="mb-3">
-  <button 
-    hx-post="/generate-chapters" 
-    hx-confirm="Сгенерировать отмеченные главы?" 
-    hx-target="#outline-table" 
-    hx-swap="innerHTML"
-    class="btn btn-success btn-sm"
-  >
-    📚 Сгенерировать главы
-  </button>
-
-  <button 
-    hx-post="/delete-book" 
-    hx-confirm="Удалить книгу безвозвратно?" 
-    class="btn btn-danger btn-sm float-end"
-    name="book_id"
-    value="{{ book.id }}"
-  >
-    🗑 Удалить
-  </button>
+  <button hx-post="/generate-chapters" hx-confirm="Сгенерировать главы?" hx-target="#outline-table" class="btn btn-success btn-sm">📚 Сгенерировать главы</button>
+  <button hx-post="/delete-book" hx-confirm="Удалить книгу?" class="btn btn-danger btn-sm float-end" name="book_id" value="{{ book.id }}">🗑 Удалить</button>
 </div>
 
-<!-- Таблица сюжета -->
 <div id="outline-table">
   {% include "book_outline_table.html" %}
 </div>

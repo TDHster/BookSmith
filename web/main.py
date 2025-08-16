@@ -23,5 +23,15 @@ init_chapter_routes(app)
 init_outline_routes(app)
 init_delete_routes(app)
 
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", debug=False, use_reloader=False, port=8000)
+    
+    
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=False, use_reloader=False, port=8000)
+    debug_mode = settings.FLASK_ENV == 'development'
+    app.run(
+        host='0.0.0.0',
+        port=8000,
+        debug=debug_mode,
+        use_reloader=debug_mode
+    )
