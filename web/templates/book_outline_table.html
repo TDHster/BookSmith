@@ -37,9 +37,13 @@
                  hx-swap="outerHTML">
         {% endif %}
       </td>
-      {% for sl in storylines %}
-      <td>
-        <textarea class="form-control" rows="3">{{ ch[sl] }}</textarea>
+          {% for sl in storylines %}
+          <td class="clickable-cell"
+          data-book-id="{{ book.id }}"
+          data-chapter="{{ ch.Chapter }}"
+          data-line="{{ sl }}"
+          data-content="{{ ch[sl] | e }}">
+        {{ ch[sl] }}
       </td>
       {% endfor %}
     </tr>
