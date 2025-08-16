@@ -40,7 +40,7 @@ def generate_chapters_for_book(book_id: int, user_id: int, language: str = setti
 
         # Генерируем главы
         for row in chapters:
-            if row.get("Generate") != "✅":
+            if row.get("Generate") != True:
                 continue
 
             chapter_num = int(row["Chapter"])
