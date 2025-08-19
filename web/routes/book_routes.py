@@ -27,7 +27,7 @@ def init_book_routes(app):
         session_db = get_session()
         try:
             books = session_db.query(Book).filter(Book.user_id == user_id).all()
-            return render_template("books.html", books=books)
+            return render_template("books.html", books=books, user_id=user_id)
         finally:
             session_db.close()
 

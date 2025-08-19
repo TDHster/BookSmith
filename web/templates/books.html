@@ -2,6 +2,14 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+<!-- Ссылка на админку -->
+{% if user_id == 1 %}
+  <div class="mb-3">
+    <a href="/admin/books" class="btn btn-sm btn-outline-warning">🛠️ Админка</a>
+  </div>
+{% endif %}
+
 <h1 class="mb-4">Мои книги</h1>
 
 <div class="row">

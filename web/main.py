@@ -15,6 +15,7 @@ from web.routes.book_routes import init_book_routes
 from web.routes.chapter_routes import init_chapter_routes
 from web.routes.outline_routes import init_outline_routes
 from web.routes.delete_routes import init_delete_routes
+from web.routes.admin_routes import init_admin_routes
 
 # Регистрируем все маршруты
 init_auth_routes(app)
@@ -22,6 +23,7 @@ init_book_routes(app)
 init_chapter_routes(app)
 init_outline_routes(app)
 init_delete_routes(app)
+init_admin_routes(app)
 
 # if __name__ == "__main__":
 #     app.run(host="0.0.0.0", debug=False, use_reloader=False, port=8000)
